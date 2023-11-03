@@ -16,3 +16,11 @@ packete installieren:
 
 
 
+zum starten:
+virtuelle Umgebung aktivieren, dann unter /project/project:
+python manage.py runserver
+
+dann im browser über 127.0.0.1:8000
+
+username: admin,
+pw: admin
