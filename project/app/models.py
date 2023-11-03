@@ -1,3 +1,43 @@
 from django.db import models
+from django.contrib.auth import get_user_model# Create your models here.
+from django.conf import settings
 
-# Create your models here.
+
+
+class Vocabulary(models.Model):
+    original_word = models.CharField(max_length=200)
+
+    right_translation = models.CharField(max_length=200)
+    wrong_aswers = models.JSONField() # for multiple choice
+    gap_text = models.CharField(max_length=200)
+    
+    def __str__(self):
+        return self.original_word+ ": " + self.right_translation
+    def easy(self):
+        context = {
+            "original_word": self.original_word, 
+            "right_translation": self.right_translation
+        }
+        template = "app/reading.html"
+        return context, template
+    def middle(self):
+        l =self.wrong_aswers['0']
+        l.append(self.right_translation)
+        context = {"data":l}
+        template = "app/multiple_choice.html"
+        return context, template
+
+
+    def hard(self):
+        context = {"original_word": self.original_word}
+        template = "app/gap_text.html"
+        return context, template
+
+
+
+
+
+class Progress(models.Model):
+    card = models.ForeignKey(Vocabulary, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
+    progress = models.IntegerField(default=0)

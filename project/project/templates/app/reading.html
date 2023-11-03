@@ -1,0 +1,10 @@
+{% extends 'app/question_mode.html' %}
+
+{% block card %}
+<p>
+{{ original_word }} bedeutet: {{ right_translation }}</p>
+
+<button name="subject" type="submit" value="1">Gewusst</button><br>
+<button name="subject" type="submit" value="0">Nicht gewusst</button>
+
+{% endblock %}

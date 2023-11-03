@@ -2,7 +2,13 @@
 
 {% block content %}
 
+<p>
 Hello {{ user }}!
 Heute ist der {{ date }}
+</p>
+
+<a href="{% url 'learn' %}">Etwas lernen!</a>
+
+
 
 {% endblock %}
