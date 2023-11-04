@@ -14,13 +14,16 @@ Virtuelle Umgebung aktivieren:
 packete installieren:
     pip install -r requirements.txt
 
+superuser anlegen
+im ordner /project:
+python3 manage.py createsuperuser
 
 
 zum starten:
-virtuelle Umgebung aktivieren, dann unter /project/project:
-python manage.py runserver
+virtuelle Umgebung aktivieren, dann unter /project:
+python3 manage.py runserver
 
 dann im browser über 127.0.0.1:8000
 
-username: admin,
-pw: admin
+admin oberfläche:
+127.0.0.1:8000/admin
