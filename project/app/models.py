@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model# Create your models here.
 from django.conf import settings
-
+import random
 
 
 class Vocabulary(models.Model):
@@ -14,6 +14,8 @@ class Vocabulary(models.Model):
     def __str__(self):
         return self.original_word+ ": " + self.right_translation
     def easy(self):
+        """Einprägen
+        """
         context = {
             "original_word": self.original_word, 
             "right_translation": self.right_translation
@@ -21,15 +23,21 @@ class Vocabulary(models.Model):
         template = "app/reading.html"
         return context, template
     def middle(self):
+        """Multiple Choice
+        l : list of possible answers
+        """
         l =self.wrong_aswers['0']
         l.append(self.right_translation)
-        context = {"data":l}
+        random.shuffle(l)
+        context = {"data":l, "original_word": self.original_word}
         template = "app/multiple_choice.html"
         return context, template
 
 
     def hard(self):
-        context = {"original_word": self.original_word}
+        """Lückentext
+        """
+        context = {"gap_text": self.gap_text}
         template = "app/gap_text.html"
         return context, template
 

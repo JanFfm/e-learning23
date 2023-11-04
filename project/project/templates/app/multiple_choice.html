@@ -1,8 +1,10 @@
 {% extends 'app/question_mode.html' %}
+{% block card_title%}Was ist die richtige Antwort?{% endblock%}
+
 
 {% block card %}
 <p>
-{{ original_word }} bedeutet: 
+{{ original_word }} bedeutet: <br>
 <input type="radio" id="1" name="radio" value="{{ data.0 }}">
 <label for="1">{{ data.0 }}</label><br>
 <input type="radio" id="2" name="radio" value="{{ data.1 }}">
@@ -11,6 +13,7 @@
 <label for="3">{{ data.2 }}</label><br>
 <input type="radio" id="3" name="radio" value="{{ data.3 }}">
 <label for="4">{{ data.3 }}</label><br>
-<button name="subject" type="submit">Absenden</button><br>
+<br>
+<button name="subject" class="btn btn-primary" type="submit">Absenden</button><br>
 
 {% endblock %}

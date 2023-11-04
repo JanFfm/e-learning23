@@ -1,10 +1,13 @@
 {% extends 'app/question_mode.html' %}
+{% block card_title%}Merke dir die Bedeutung{% endblock%}
+
 
 {% block card %}
 <p>
-{{ original_word }} bedeutet: {{ right_translation }}</p>
+{{ original_word }} bedeutet:<br>
+ {{ right_translation }}
+</p>
 
-<button name="subject" type="submit" value="1">Gewusst</button><br>
-<button name="subject" type="submit" value="0">Nicht gewusst</button>
+<button name="subject" type="submit" class="btn btn-primary" value="1">Gewusst</button> <button name="subject" type="submit" class="btn btn-danger" value="0">Nicht gewusst</button>
 
 {% endblock %}
