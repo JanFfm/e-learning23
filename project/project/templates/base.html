@@ -1,5 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{% block title %}>E-Learning App{% endblock %}</title>
+{% load static %}
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{# Display django.contrib.messages as Bootstrap alerts #}
+{% bootstrap_messages %}
+</head>
+<body>
+
 <h1>E-Learning App</h2>
 
 {% block content %}
 
 {% endblock %}
+
+</body>
+</html>
