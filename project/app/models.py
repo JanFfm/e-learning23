@@ -17,6 +17,7 @@ class Vocabulary(models.Model):
         """Einprägen
         """
         context = {
+            "pk": self.pk,
             "original_word": self.original_word, 
             "right_translation": self.right_translation
         }
@@ -29,7 +30,10 @@ class Vocabulary(models.Model):
         l =self.wrong_aswers['0']
         l.append(self.right_translation)
         random.shuffle(l)
-        context = {"data":l, "original_word": self.original_word}
+        context = {
+            "pk": self.pk,
+            "data":l, 
+            "original_word": self.original_word}
         template = "app/multiple_choice.html"
         return context, template
 
@@ -37,7 +41,8 @@ class Vocabulary(models.Model):
     def hard(self):
         """Lückentext
         """
-        context = {"gap_text": self.gap_text}
+        context = {"pk": self.pk,
+                   "gap_text": self.gap_text}
         template = "app/gap_text.html"
         return context, template
 
@@ -49,3 +54,11 @@ class Progress(models.Model):
     card = models.ForeignKey(Vocabulary, on_delete=models.CASCADE, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     progress = models.IntegerField(default=0)
+    
+    def decrease(self):
+        if self.progress > 0:
+            self.progress -= 1
+            
+    def increase(self):
+          if self.progress < 9:
+                self.progress += 1
