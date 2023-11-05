@@ -1,7 +1,25 @@
 from django.db import models
-from django.contrib.auth import get_user_model# Create your models here.
+from django.contrib.auth import get_user_model # Create your models here.
 from django.conf import settings
 import random
+
+class Word(models.Model):
+    word = models.CharField()
+    translation = models.CharField()
+    WORD_CHOICES = (
+        ("1", "noun"),  
+        ("2", "verb"),
+        ("3","adverb"),
+        ("4","adjective"),
+        ("5","pronoun"),
+        ("6","preposition"),
+        ("7","conjunction"),
+        ("8","interjection"),
+        ("9","determiner"))
+    part_of_speech = models.CharField(choices=WORD_CHOICES, max_length=1)
+         
+    
+
 
 
 class Vocabulary(models.Model):
