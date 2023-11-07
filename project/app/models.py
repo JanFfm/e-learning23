@@ -4,8 +4,8 @@ from django.conf import settings
 import random
 
 class Word(models.Model):
-    word = models.CharField()
-    translation = models.CharField()
+    word = models.CharField(max_length=300)
+    translation = models.CharField(max_length=300)
     WORD_CHOICES = (
         ("1", "noun"),  
         ("2", "verb"),
@@ -21,7 +21,7 @@ class Word(models.Model):
     
 
 
-
+'''
 class Vocabulary(models.Model):
     original_word = models.CharField(max_length=200)
 
@@ -64,14 +64,18 @@ class Vocabulary(models.Model):
         template = "app/gap_text.html"
         return context, template
 
-
+'''
 
 
 
 class Progress(models.Model):
-    card = models.ForeignKey(Vocabulary, on_delete=models.CASCADE, null=True)
+    word = models.ForeignKey(Word, on_delete=models.CASCADE, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     progress = models.IntegerField(default=0)
+    
+    class Meta:
+            unique_together = (('word', 'user'),)
+
     
     def decrease(self):
         if self.progress > 0:
