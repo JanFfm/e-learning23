@@ -20,7 +20,7 @@ def homepage(request):
 @login_required
 def learn(request):
     if request.method == "GET":
-        learn_modes = [multiple_choice, word_translation]  # place other learn methods as function here:
+        learn_modes = [multiple_choice]  # place other learn methods as function here: , word_translation
         random_choice = learn_modes[random.randint(0, len(learn_modes) - 1 )]
         return random_choice(request)
         
@@ -40,10 +40,10 @@ def learn(request):
     
 def multiple_choice(request):
     """ Prepare a multiple choice question"""
-    words = Word.objects.all().order_by('?')[:4] # pick 4 cards
+    words = random.sample(list(Word.objects.all()), 4) # pick 4 cards
     
     cache.set('mode', 'multiple_choice', 30)
-    cache.set("word", words[0].pk)
+    cache.set("word", words[0].id)
     question = words[0].word
     possible_answers = [w.translation for w in words]
     random.shuffle(possible_answers)
@@ -57,6 +57,7 @@ def eval_multiple_choice(request, word: Word):
     progress_obj, _ = Progress.objects.get_or_create(user=request.user, word=word)
 
     answer = request.POST['answer']
+    print(answer)
     if answer.lower()  == word.translation.lower():
         messages.success(request, "Das war richtig.")
         progress_obj.increase()

@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth import get_user_model # Create your models here.
 from django.conf import settings
 import random
+import re
 
 class Word(models.Model):
     word = models.CharField(max_length=300)
@@ -17,8 +18,19 @@ class Word(models.Model):
         ("8","interjection"),
         ("9","determiner"))
     part_of_speech = models.CharField(choices=WORD_CHOICES, max_length=1)
-         
     
+    def __str__(self):
+        return self.word +": "+self.translation
+         
+
+class Sentence(models.Model):
+    sentence_en = models.CharField(max_length=500)
+    sentence_de = models.CharField(max_length=500)
+    
+    def get_words_en(self):
+        return random.shuffle(re.sub(r'[^\w\s]', '', self.sentence_en). split(" "))    
+    def __str__(self):
+         return self.sentence_en
 
 
 '''
@@ -75,12 +87,16 @@ class Progress(models.Model):
     
     class Meta:
             unique_together = (('word', 'user'),)
+    def __str__(self):
+         return str(self.word.word) +", "+ str(self.user) + " Progress: " + str(self.progress)
 
     
     def decrease(self):
         if self.progress > 0:
             self.progress -= 1
+            self.save()
             
     def increase(self):
           if self.progress < 9:
                 self.progress += 1
+                self.save()
