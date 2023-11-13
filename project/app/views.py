@@ -20,7 +20,7 @@ def homepage(request):
 @login_required
 def learn(request):
     if request.method == "GET":
-        learn_modes = [multiple_choice]  # place other learn methods as function here: , word_translation
+        learn_modes = [multiple_choice , word_translation]  # place other learn methods as function here:
         random_choice = learn_modes[random.randint(0, len(learn_modes) - 1 )]
         return random_choice(request)
         
