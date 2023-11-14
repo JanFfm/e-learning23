@@ -1,0 +1,22 @@
+
+{% extends 'app/question_mode.html' %}
+{% load static %}
+{% block card_title%}Fülle die Lücke!{% endblock%}
+
+{% block card %}
+<p>
+  <figure>
+      <figcaption>Was für ein Wort hörst du?</figcaption>
+      <audio controls src="/media/hello.mp3">
+          <a href="/media/hello.mp3"> Download audio </a> 
+      </audio>
+  </figure>
+</p>
+
+<label for="answer">Was ist die Übersetzung, des gesprochenen Wortes?</label><br>
+<input type="text" id="answer" name="answer" required=""><br>
+</p>
+<p>
+<button name="subject" type="submit"  class="btn btn-primary">Absenden</button>
+</p>
+{% endblock %}

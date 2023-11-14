@@ -1,0 +1,43 @@
+{% extends 'app/question_mode.html' %}
+{% block card_title%}Fülle die Lücke!{% endblock%}
+
+{% block card %}
+<p>
+{{ question }}</p>
+<label for="output">Wie wird das Wort übersetzt?</label><br>
+<input type="text" id="ans" name="ans" required=""><br>
+</p>
+
+<div class="speaker" style="display: flex;justify-content: space-between;width: 13rem;box-shadow: 0 0 13px #0000003d;border-radius: 5px;">
+    <p id="action" style="color: grey;font-weight: 800; padding: 0; padding-left: 2rem;"></p>
+    <button onclick="runSpeechRecog()" style="border: transparent;padding: 0 0.5rem;">
+       Speech
+    </button>
+ </div>
+
+ <h3 id="answer" name="answer" class="hide" required=""></h3>
+ <script>
+    runSpeechRecog = () => {
+       document.getElementById("answer").innerHTML = "Loading text...";
+       var output = document.getElementById('answer');
+       var ans = document.getElementById('ans');
+       var action = document.getElementById('action');
+       let recognization = new webkitSpeechRecognition();
+       recognization.onstart = () => {
+          action.innerHTML = "Listening...";
+       }
+       recognization.onresult = (e) => {
+          var transcript = e.results[0][0].transcript;
+          output.innerHTML = transcript;
+          output.classList.remove("hide")
+          action.innerHTML = "";
+          ans.value = transcript;
+       }
+       recognization.start();
+    }
+ </script>
+
+<p>
+    <button name="subject" type="submit"  class="btn btn-primary">Absenden</button>
+</p>
+{% endblock %}
