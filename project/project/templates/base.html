@@ -10,7 +10,6 @@
 {% bootstrap_javascript %}
 {% bootstrap_messages %}
 <script src="{% static 'js/htmx.min.js' %}" defer></script>{# or however you include htmx #}
-{% django_htmx_script %}
 </head>
 <body  hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
@@ -22,6 +21,8 @@
 
 </body>
 
+
+{#% django_htmx_script %#}
 {% block scripts %}
 
 {% endblock %}

@@ -2,9 +2,11 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.cache import cache
+from django.http import HttpResponse
+from django_htmx.http import HttpResponseClientRedirect
 import random
 import datetime
-from .models import  Progress, Word, Sentence
+from .models import  Progress, Word, Sentence, ProgressSentence
 
 
 @login_required
@@ -18,13 +20,12 @@ def homepage(request):
     
 
 @login_required
-def learn(request):
+def learn(request): 
     if request.method == "GET":
-        learn_modes = [build_sentence]  # multiple_choice , word_translation    place other learn methods as function here:
+        learn_modes = [multiple_choice , word_translation, build_sentence]  #     place other learn methods as function here:
         random_choice = learn_modes[random.randint(0, len(learn_modes) - 1 )]
         return random_choice(request)
-        
-  
+   
         
     elif request.method == "POST":
         learn_mode = cache.get('mode')
@@ -37,41 +38,65 @@ def learn(request):
 
                 return eval_word_translation(request, word)
             # and here for evaluation:
-            case "sentence_building":
-                sentence = Sentence.objects.filter(pk=int(cache.get("sentence")))[0]
+     
 
-                eval_sentence(request, sentence)
-                    
         
 def build_sentence(request): 
-            if request.method == "GET":
-    
+            if request.method == "GET":    
                 sentence = random.sample(list(Sentence.objects.all()), 1)[0]
                 template = "app/build_sentence.html"
                 words = sentence.get_words_en()
-                context = {"sentence": sentence.sentence_de, "words":words}        
-                
-                cache.set('mode', 'sentence_building', 300)
-                cache.set("sentence", sentence.id, 300)
+                context = {"sentence": sentence.sentence_de, "words":words, "htmx_url": 'push_word', "pk": sentence.id, "target_id": "#word-container"}        
+       
                 return render(request, template, context)
                 
         
+       
+
+
+@login_required
+def push__or_eval_word(request, action=None, index=None):
+    print(request.POST)
+    if request.htmx: 
+        if action and index: 
+            index = int(index)
+            words = request.POST.getlist('words')  if 'words' in request.POST.keys() else []
+            selected_words = request.POST.getlist('selected_words') if 'selected_words' in request.POST.keys() else []
+
+
+            if action=="push":
+                selected_words.append(words[index])
+                words.pop(index)
                 
-            elif request.method == "POST":
-                    sentence = get_object_or_404(Sentence, pk=sentence_id)
-                    selected_word = request.POST.get('selected_word')
+                context = {"words":words, "selected_words":selected_words, "htmx_url": 'push_word', "target_id": "#word-container"}        
+                return render(request, "app/partials/sentence_building_partial.html", context)
+            elif action=="pull":
+                words.append(selected_words[index])
+                selected_words.pop(index)
+                context = {"words":words, "selected_words":selected_words, "htmx_url": 'push_word', "target_id": "#word-container"}      
+                return render(request, "app/partials/sentence_building_partial.html", context)
 
-                    # Fügen Sie das ausgewählte Wort zur Liste der bisher ausgewählten Wörter hinzu
-                    constructed_sentence = request.session.get('constructed_sentence', [])
-                    constructed_sentence.append(selected_word)
-                    request.session['constructed_sentence'] = constructed_sentence
+                
+            elif action == "check":
+                if len(words) > 0:
+                    context = {"words":words, "selected_words":selected_words, "htmx_url": 'push_word', "target_id": "#word-container", "message": "Bitte setze den Satz aus allen Wörtern zusammen!"}      
+                    return render(request, "app/partials/sentence_building_partial.html", context)
+                else:
+                    print(selected_words)
+                    sentence = Sentence.objects.get(pk=int(request.POST['pk']))
+                    solution = sentence.return_solution(selected_words)
+                    progress_obj, _ = ProgressSentence.objects.get_or_create(user=request.user, sentence=sentence)
+                    
+                    if solution:
+                        progress_obj.increase()
+                        messages.success(request, "Das war richtig.")
 
-                    # Hier könnten Sie auch den Fortschritt des Benutzers speichern
-                    # Zum Beispiel, wenn der Benutzer fertig ist, könnten Sie die Antwort überprüfen und Punkte vergeben
+                    else:
+                        progress_obj.decrease()
+                        messages.error(request, "Das war leider falsch!")
+                    return HttpResponseClientRedirect("learn")
 
-                    return JsonResponse({'constructed_sentence': constructed_sentence})
-def eval_sentence(request, sentence):
-    print("eval")            
+                                    
 
 def multiple_choice(request):
     """ Prepare a multiple choice question"""

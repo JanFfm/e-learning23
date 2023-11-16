@@ -1,0 +1,24 @@
+
+<p id ="words_to_choose">
+    {% for word in words %}
+      <button type="submit" hx-post="{% url 'push_word' 'push' forloop.counter0 %}" hx-target="#words_to_choose"  hx-swap="innerHTML"  class="word-button" >
+        {{ word }}
+        <input type="hidden" name="words" value="{{ word }}"> 
+      </button>
+    {% endfor %}
+  </p>
+  <hr>
+  <p id="selected-words">
+    {% for word in selected_words %}
+    <button type="submit" hx-post="{% url 'push_word' 'pull' forloop.counter0 %}" id="{{forloop.counter0}}_selected_words" hx-target="#words_to_choose"  hx-swap="innerHTML"  class="selected_words-button">
+        {{ word }} <input type="hidden" name="selected_words" value="{{ word }}"></button>
+
+
+
+    {% endfor %}
+    <br>
+    
+
+
+  </p>  
+    {{ message }}

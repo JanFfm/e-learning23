@@ -31,7 +31,14 @@ class Sentence(models.Model):
     def get_words_en(self):
         words = re.sub(r'[^\w\s]', '', self.sentence_en).split(" ")
         random.shuffle(words)
-        return words     
+        return words  
+    def return_solution(self,selection:list):
+        words = re.sub(r'[^\w\s]', '', self.sentence_en).split(" ")
+        print(words, selection)
+        if words == selection:
+            return True
+        return False
+           
     
     def __str__(self):
          return self.sentence_en
@@ -104,3 +111,10 @@ class Progress(models.Model):
           if self.progress < 9:
                 self.progress += 1
                 self.save()
+
+
+class ProgressSentence(Progress):
+    sentence = models.ForeignKey(Sentence, on_delete=models.CASCADE, null=True)
+    word = None
+
+    

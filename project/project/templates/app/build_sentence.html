@@ -1,20 +1,15 @@
-{% extends 'app/question_mode.html' %}
-{% block card_title%}Übersetzen den Satz!{% endblock%}
+{% extends 'app/question_mode_htmx.html' %}
+{% block card_title%}Baue den Satz zusammen!{% endblock%}
 
 
 {% block card %}
 "{{ sentence }}"
-<p id="sentence-container">
 
-    {% for word in words %}
-      <button type="button" class="word-button" data-word="{{ word }}">
-        {{ word }}
-      </button>
-    {% endfor %}
-  </p>
-  <hr>
-  <p id="selected-words"></p>
-  <button type="button" id="submit-button">Satz überprüfen</button>
+<div id="word-container">
+  {% include "app/partials/sentence_building_partial.html" %}
+ 
+</div>
+  <button type="submit" id="submit-button" hx-post="{% url 'push_word' 'check' 0 %}" hx-target="#words_to_choose"  hx-swap="innerHTML">Satz überprüfen</button>
 {% endblock %}
 
 
@@ -26,64 +21,8 @@
 
 {% block scripts %}
 <script>
-    const sentenceContainer = document.getElementById('sentence-container');
-    const selectedWordsContainer = document.getElementById('selected-words');
-    const submitButton = document.getElementById('submit-button');
-    const wordButtons = document.querySelectorAll('.word-button');
-    const selectedWords = [];
 
-    wordButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        const word = button.getAttribute('data-word');
-        selectedWords.push(word);
-        button.style.display = 'none';  
-        updateSelectedWords();
-      });
-    });
-
-    submitButton.addEventListener('click', function() {
-      const csrfToken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
-
-      fetch('', { 
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken,
-        },
-        body: JSON.stringify({ sentence: selectedWords }),
-      })
-      .then(response => response.json())
-      .then(data => {
-        alert(data.message);  // Anzeige einer einfachen Nachricht vom Backend
-      })
-      .catch(error => console.error('Error:', error));
-    });
-
-    function updateSelectedWords() {
-      selectedWordsContainer.innerHTML = selectedWords.map(word => `
-        <button type="button" class="selected-word-button" data-word="${word}">
-          ${word}
-        </button>
-      `).join(' ');
-
-      const selectedWordButtons = document.querySelectorAll('.selected-word-button');
-      selectedWordButtons.forEach(selectedWordButton => {
-        selectedWordButton.addEventListener('click', function(event) {
-          const wordToRemove = selectedWordButton.getAttribute('data-word');
-          selectedWords.splice(selectedWords.indexOf(wordToRemove), 1);
-          updateSelectedWords();
-          showWordInList(wordToRemove);
-        });
-      });
-    }
-
-    function showWordInList(word) {
-      const index = Array.from(wordButtons).findIndex(button => button.getAttribute('data-word') === word);
-      if (index !== -1) {
-        wordButtons[index].style.display = 'inline-block';
-      }
-    }
-  </script>
+     
 
 {% endblock %}
 
@@ -99,19 +38,5 @@
 
 
 
- {% comment  %}
  
- <p>
 
-    {{ sentence_de }}<br>
-    <form hx-post="{% url 'push_word' %}" hx-target='#htmx-area' class="d-flex align-items-center" method="POST">
-    <hr>
-    <div id="htmx-area">
-    {% for word in words %}
-    <button type="button" class="btn btn-outline-secondary" hx-post="{% url 'push_word' %}" hx-target="#htmx-area" hx-include="#htmx-area">{{ word }}</button>
-     {% endfor %}
-     <div>
-    </form
-    </p>
-    
- {% endcomment %}}
