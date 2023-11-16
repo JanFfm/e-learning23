@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model # Create your models here.
 from django.conf import settings
 import random
 import re
+import string
 
 class Word(models.Model):
     word = models.CharField(max_length=300)
@@ -28,7 +29,10 @@ class Sentence(models.Model):
     sentence_de = models.CharField(max_length=500)
     
     def get_words_en(self):
-        return random.shuffle(re.sub(r'[^\w\s]', '', self.sentence_en). split(" "))    
+        words = re.sub(r'[^\w\s]', '', self.sentence_en).split(" ")
+        random.shuffle(words)
+        return words     
+    
     def __str__(self):
          return self.sentence_en
 

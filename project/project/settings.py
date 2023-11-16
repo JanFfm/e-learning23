@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     "bootstrap5",
-    
+      "django_htmx",
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -52,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+     "django_htmx.middleware.HtmxMiddleware",
     'django.contrib.auth.middleware.AuthenticationMiddleware',
      "allauth.account.middleware.AccountMiddleware",
     'django.contrib.messages.middleware.MessageMiddleware',

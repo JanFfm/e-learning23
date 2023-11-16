@@ -1,14 +1,18 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <title>{% block title %}>E-Learning App{% endblock %}</title>
 {% load static %}
 {% load bootstrap5 %}
+{% load django_htmx %}
+<html>
+<head>
+  <title>{% block title %}E-Learning App{% endblock %}</title>
+
 {% bootstrap_css %}
 {% bootstrap_javascript %}
 {% bootstrap_messages %}
+<script src="{% static 'js/htmx.min.js' %}" defer></script>{# or however you include htmx #}
+{% django_htmx_script %}
 </head>
-<body>
+<body  hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
 <h1>E-Learning App</h2>
 
@@ -17,4 +21,9 @@
 {% endblock %}
 
 </body>
+
+{% block scripts %}
+
+{% endblock %}
+
 </html>
