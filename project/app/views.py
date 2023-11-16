@@ -34,21 +34,20 @@ def learn(request):
         
     elif request.method == "POST":
         learn_mode = cache.get('mode')
+        word = cache.get("word", None)
+        try:
+            word = Word.objects.filter(pk=int(word))[0]
+        except:
+            word = None 
+        
         match learn_mode:
             case "multiple_choice":
-                word = Word.objects.filter(pk=int(cache.get("word")))[0]
                 return eval_multiple_choice(request, word)
             case "word_translation":
-                word = Word.objects.filter(pk=int(cache.get("word")))[0]
-
                 return eval_word_translation(request, word)
             case "listening_comprehension":
-                word = Word.objects.filter(pk=int(cache.get("word")))[0]
-
                 return eval_listening_comprehension(request, word)
             case "speaking_exercice":
-                word = Word.objects.filter(pk=int(cache.get("word")))[0]
-
                 return eval_speaking_exercice(request, word)
             # and here for evaluation:
      
