@@ -43,8 +43,12 @@ def learn(request):
 
                 return eval_word_translation(request, word)
             case "listening_comprehension":
+                word = Word.objects.filter(pk=int(cache.get("word")))[0]
+
                 return eval_listening_comprehension(request, word)
             case "speaking_exercice":
+                word = Word.objects.filter(pk=int(cache.get("word")))[0]
+
                 return eval_speaking_exercice(request, word)
             # and here for evaluation:
      
