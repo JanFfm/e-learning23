@@ -5,8 +5,8 @@ from django.core.cache import cache
 from django.http import HttpResponse
 from django_htmx.http import HttpResponseClientRedirect
 import random
-import datetime
-from .models import  Progress, Word, Sentence, ProgressSentence
+from datetime import datetime
+from .models import  Progress, Word, Sentence, ProgressSentence, Streak
 from gtts import gTTS
 from io import BytesIO
 import speech_recognition as sr
@@ -17,7 +17,7 @@ import pyttsx3
 def homepage(request):
     if request.method =="GET":
         context = {
-            "date": datetime.datetime.now(),
+            "date": datetime.now(),
         }
         return render(request,"app/dashboard.html", context)
     
@@ -26,6 +26,11 @@ def homepage(request):
 @login_required
 def learn(request): 
     if request.method == "GET":
+        
+        streak, _ = Streak.objects.get_or_create(user=request.user)
+        streak.add_time(str(datetime.now().today().date())+","+str(datetime.now().hour)+":00")
+        
+        
 
         learn_modes = [multiple_choice, word_translation, listening_comprehension, speaking_exercice, build_sentence]  # place other learn methods as function here:
         random_choice = learn_modes[random.randint(0, len(learn_modes) - 1 )]
