@@ -121,7 +121,7 @@ class ProgressPerHour(models.Model):
 
     
 
-class LectionPorgress(models.Model):
+class LectionProgress(models.Model):
     lection_number = models.IntegerField()
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
 
