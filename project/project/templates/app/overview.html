@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<p>
+Hello {{ user }}!
+</p>
+
+<p>
+    <a href="{% url 'learn' 1 %}">Lektion 1!</a>
+</p>
+
+<p>
+    <a href="{% url 'learn' 2 %}">Lektion 2!</a>
+</p>
+
+
+{% endblock %}

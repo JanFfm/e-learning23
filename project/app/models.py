@@ -6,6 +6,7 @@ import re
 import string
 
 class Word(models.Model):
+    
     word = models.CharField(max_length=300)
     translation = models.CharField(max_length=300)
     WORD_CHOICES = (

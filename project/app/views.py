@@ -21,10 +21,16 @@ def homepage(request):
         }
         return render(request,"app/dashboard.html", context)
     
-    
 
 @login_required
-def learn(request): 
+def lesson_overview(request):
+    if request.method == "GET":
+
+        return render(request, "app/overview.html")
+
+
+@login_required
+def learn(request, id): 
     if request.method == "GET":
 
         learn_modes = [multiple_choice, word_translation, listening_comprehension, speaking_exercice, build_sentence]  # place other learn methods as function here:

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from .views import homepage, learn, push__or_eval_word
+from .views import homepage, learn, push__or_eval_word, lesson_overview
 
 urlpatterns = [
     path('', homepage),
@@ -8,5 +8,7 @@ urlpatterns = [
 
     path("push_word", push__or_eval_word, name="push_word"),
 
-    path("learn", learn, name="learn"),
+    path("learn/<id>", learn, name="learn"),
+
+    path("overview", lesson_overview, name="overview"),
 ]
