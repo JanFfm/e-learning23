@@ -4,6 +4,8 @@ from django.conf import settings
 import random
 import re
 import string
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db.models import JSONField
 
 class Word(models.Model):
     
@@ -89,7 +91,47 @@ class Vocabulary(models.Model):
         return context, template
 
 '''
+#ToDO: Rangliste für User per h
+# Gewichtete Fragen-Auswahl nach besten/schlechtesten
+# Steak
+# Statistik für Aufgabentypen
+# statistiken nach versch. Zeitfenstern filtern
 
+class Streak(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, unique=True)
+    learning_times = JSONField(default=list)
+    
+    def add_time(self, time):
+        print(self.learning_times)
+        if time not in self.learning_times:
+            self.learning_times.append(time)
+            self.save()
+
+
+    
+
+
+class ProgressPerHour(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
+    word_count = models.IntegerField()
+    correct_word_count = models.IntegerField()
+    
+    sentence_count = models.IntegerField()
+    correct_sentence_count = models.IntegerField()
+
+
+    
+
+class LectionProgress(models.Model):
+    lection_number = models.IntegerField()
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
+
+    progress = models.FloatField( validators=[MinValueValidator(0.0), MaxValueValidator(1.0)])
+    
+    def get_progress(self):
+        return self.progress
+    def __str__(self):
+        return "Vortschritt in Lektion {0} für {1}".format(self.lection_number, self.user)
 
 
 class Progress(models.Model):
