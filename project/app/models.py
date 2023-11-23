@@ -6,6 +6,7 @@ import re
 import string
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import JSONField
+from datetime import datetime, timedelta
 
 class Word(models.Model):
     word = models.CharField(max_length=300)
@@ -95,28 +96,90 @@ class Vocabulary(models.Model):
 # Steak
 # Statistik für Aufgabentypen
 # statistiken nach versch. Zeitfenstern filtern
-
-class Streak(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, unique=True)
-    learning_times = JSONField(default=list)
+class TimeStamp(models.Model):
+    date =models.DateField()
+    hour = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(23)])
+    related_users = models.ManyToManyField(settings.AUTH_USER_MODEL)
     
+    class Meta:
+        unique_together = ('date', 'hour')
+    
+    def calculate_time_difference(self, other):
+        my_time = datetime.combine(self.date, datetime.min.time()) + timedelta(hours=self.hour)
+        other_time = datetime.combine(other.date, datetime.min.time()) + timedelta(hours=other.hour)
+        time_difference = abs(my_time - other_time)
+        return time_difference.total_seconds() / 3600
+    def __str__(self):
+        return f"{self.date}: {self.hour}:00"
+
+
+class Streaks(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, unique=True)
+    learning_times = models.ManyToManyField(TimeStamp)    
+    
+    def print_times(self):
+        return str(self.learning_times.all())
     def add_time(self, time):
         print(self.learning_times)
         if time not in self.learning_times:
-            self.learning_times.append(time)
+            self.learning_times.add(time)
             self.save()
+            self.check_streak()
+            
+            
+    def count_streaks(self):
+        print(self.learning_times.all())
+
+        sorted_learning_times = sorted(self.learning_times.all(), key=lambda x: (x.date, x.hour))
+        longest_streak = 0
+        act_streak = 1
+
+        for i, timestamp in enumerate(sorted_learning_times[1:], start=1):
+            time_difference = timestamp.calculate_time_difference(sorted_learning_times[i - 1])
+            if time_difference <= 1:
+                act_streak += 1
+            else:
+                longest_streak = max(longest_streak, act_streak)
+                act_streak = 1
+        if longest_streak == 0:
+            longest_streak = act_streak
+     
+        return longest_streak, act_streak
+    
+    def check_if_in_streak(self, time_stamp): 
+        print(__name__)  
+      
+        if (len(self.learning_times.all())) == 0:
+            print("len")
+            return False
+        sorted_learning_times = sorted(self.learning_times.all(), key=lambda x: (x.date, x.hour))
+
+        time_difference = time_stamp.calculate_time_difference(sorted_learning_times[-1])
+        print(time_difference)
+        if time_difference > 1:
+            return False
+        else:
+            return True
+
+        
+            
+        
+
 
 
     
 
 
 class ProgressPerHour(models.Model):
+    time_stamp = models.ForeignKey(TimeStamp, on_delete=models.CASCADE, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     word_count = models.IntegerField()
     correct_word_count = models.IntegerField()
     
     sentence_count = models.IntegerField()
     correct_sentence_count = models.IntegerField()
+    class Meta:
+        unique_together = ('user', 'time_stamp')
 
 
     
@@ -141,7 +204,7 @@ class Progress(models.Model):
     class Meta:
             unique_together = (('word', 'user'),)
     def __str__(self):
-         return str(self.word.word) +", "+ str(self.user) + " Progress: " + str(self.progress)
+         return str(self.word) +", "+ str(self.user) + " Progress: " + str(self.progress)
 
     
     def decrease(self):

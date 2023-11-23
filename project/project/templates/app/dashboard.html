@@ -7,6 +7,13 @@ Hello {{ user }}!
 Heute ist der {{ date }}
 </p>
 
+<p>
+{{streak_message}}. Du hast jetzt {{streak_count}} Stunden gelernt!<br>
+
+{% if longest_streak %}Deine längste streak war  {{ longest_streak }}{% endif %}
+
+</p>
+
 <a href="{% url 'learn' %}">Etwas lernen!</a>
 
 

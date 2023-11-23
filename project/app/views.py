@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django_htmx.http import HttpResponseClientRedirect
 import random
 from datetime import datetime
-from .models import  Progress, Word, Sentence, ProgressSentence, Streak
+from .models import  Progress, Word, Sentence, ProgressSentence, Streaks, TimeStamp, ProgressPerHour
 from gtts import gTTS
 from io import BytesIO
 import speech_recognition as sr
@@ -16,7 +16,26 @@ import pyttsx3
 @login_required
 def homepage(request):
     if request.method =="GET":
+        time_stamp,_ = TimeStamp.objects.get_or_create(date=datetime.now().today().date(), hour=datetime.now().hour) 
+        users_streaks, created = Streaks.objects.get_or_create(user=request.user)        
+       
+    
+        if not created and users_streaks.check_if_in_streak(time_stamp):
+            streake_message = "Setze jetzt deine Streak fort!"
+            longest_streak , streak_count = users_streaks.count_streaks()
+        else:
+            streake_message = "Beginen jetzt eine neue Streak!"
+            streak_count = 0  
+            if created:
+                 longest_streak = None          
+            else:
+                longest_streak , _ = users_streaks.count_streaks()
+                   
+        
         context = {
+            "streak_message": streake_message,
+            "streak_count": streak_count,
+            "longest_streak": longest_streak,
             "date": datetime.now(),
         }
         return render(request,"app/dashboard.html", context)
@@ -25,10 +44,14 @@ def homepage(request):
 
 @login_required
 def learn(request): 
-    if request.method == "GET":
+    if request.method == "GET":        
+        streak, _ = Streaks.objects.get_or_create(user=request.user)
+        time_stamp = set_time_stamp(request.user)        
+        if not streak.learning_times.filter(pk=time_stamp.pk).exists(): 
+         streak.learning_times.add(time_stamp)
+   
         
-        streak, _ = Streak.objects.get_or_create(user=request.user)
-        streak.add_time(str(datetime.now().today().date())+","+str(datetime.now().hour)+":00")
+       
         
         
 
@@ -68,7 +91,21 @@ def build_sentence(request):
                 return render(request, template, context)
                 
         
-       
+def set_time_stamp(user):
+    time_stamp, _ = TimeStamp.objects.get_or_create(date=datetime.now().today().date(), hour=datetime.now().hour) 
+    if not time_stamp.related_users.filter(pk=user.pk).exists():
+        time_stamp.related_users.add(user)
+        time_stamp.save() 
+    return time_stamp         
+
+def set_answer_statistics(user, correct):
+    time_stamp = set_time_stamp(user)
+    progress_per_hour, = ProgressPerHour.objects.get_or_create(user=user, )
+    if correct:
+        pass
+    else:
+        pass
+                  
 
 
 @login_required
