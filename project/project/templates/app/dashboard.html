@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -48,6 +49,12 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Lato", sans-serif}
         <div>
             <p class="w3-container w3-green" style="text-align:center; line-height:1.35em; font-size:40px;"> 
                 <h1 class="w3-margin w3-jumbo">Hallo {{ user }}!</h1>
+                <p>
+                  {{streak_message}}. Du hast jetzt {{streak_count}} Stunden gelernt!<br>
+                  
+                  {% if longest_streak %}Deine längste streak war  {{ longest_streak }}{% endif %}
+                  
+                  </p>
                 <h1>Womit willst du heute starten?</h1> 
             </p>
         </div>
@@ -70,15 +77,15 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Lato", sans-serif}
       <div class="container mt-5">
         <div class="row">
           <div class="col-sm-4">
-            {% comment %} <a href="{% url 'learn' %}">
+            {% comment %} <a href="{% url 'overview' %}">
                 <button>Zeit zum lernen!</button>
               </a> {% endcomment %}
             <p>
-                <a href="{% url 'learn' %}">
+                <a href="{% url 'overview' %}">
                 <button class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Zeit zum lernen!</button>
                 </a>
             </p>
-            {% comment %} <h3><a href="{% url 'learn' %}">Zeit zum lernen!</a></h3> {% endcomment %}
+            {% comment %} <h3><a href="{% url 'overview' %}">Zeit zum lernen!</a></h3> {% endcomment %}
             <span class="BaOVQ8 tz5f0K comp-lp8xjk8v wixui-rich-text">
             <p>Von Multiple Choice, zu Höraufgaben und vieles mehr...</p>
             </span>

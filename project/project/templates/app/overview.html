@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<p>
+Hello {{ user }}!
+</p>
+
+    {% for lection in lection_progress %}
+        {% if lection.unlocked %}
+            <p> 
+                <a href="{% url 'learn' lection.lection_number%}">Lektion {{lection.lection_number}}!</a>
+            </p>
+        {%else%}
+            <p> 
+                <a href="{% url 'learn' lection.lection_number%}">Lektion {{lection.lection_number}} noch nicht freigeschaltet!</a>
+            </p>
+        {%endif%}        
+    {% endfor %}
+
+{% endblock %}
