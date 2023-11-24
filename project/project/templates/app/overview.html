@@ -9,11 +9,11 @@ Hello {{ user }}!
     {% for lection in lection_progress %}
         {% if lection.unlocked %}
             <p> 
-                <a href="{% url 'learn' lection.id%}">Lektion {{lection.id}}!</a>
+                <a href="{% url 'learn' lection.lection_number%}">Lektion {{lection.lection_number}}!</a>
             </p>
         {%else%}
             <p> 
-                <a href="{% url 'learn' lection.id%}">Lektion {{lection.id}} noch nicht freigeschaltet!</a>
+                <a href="{% url 'learn' lection.lection_number%}">Lektion {{lection.lection_number}} noch nicht freigeschaltet!</a>
             </p>
         {%endif%}        
     {% endfor %}
