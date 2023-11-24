@@ -8,7 +8,7 @@ urlpatterns = [
 
     path("push_word", push__or_eval_word, name="push_word"),
 
-    path("learn/<id>", learn, name="learn"),
+    path("learn/<lection_id>", learn, name="learn"),
 
     path("overview", lesson_overview, name="overview"),
 ]

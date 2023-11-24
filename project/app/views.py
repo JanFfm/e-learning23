@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django_htmx.http import HttpResponseClientRedirect
 import random
 from datetime import datetime
-from .models import  Progress, Word, Sentence, ProgressSentence, Streak
+from .models import  Progress, Word, Sentence, ProgressSentence, Streak, LectionProgress
 from gtts import gTTS
 from io import BytesIO
 import speech_recognition as sr
@@ -25,22 +25,47 @@ def homepage(request):
 @login_required
 def lesson_overview(request):
     if request.method == "GET":
-
-        return render(request, "app/overview.html")
+        
+        lection_progress = LectionProgress.objects.all().filter(user=request.user).order_by('id')
+        
+        for i in range(len(lection_progress)):
+            if lection_progress[i].get_progress() > 0.95:
+                if i+1 <= len(lection_progress):
+                    lection_progress[i+1].unlock()
+            
+    
+       # print(lection_progress.get(user=request.user, lection_number=1).get_progress())
+        context = {
+            "lection_progress": lection_progress,
+                   }
+        return render(request, "app/overview.html", context)
 
 
 @login_required
-def learn(request, id): 
+def learn(request, lection_id):
+
+    #TODO maybe a total of 15 question and the return to main menu?
+    curr_lection_prg = LectionProgress.objects.filter(user=request.user, lection_number=lection_id).first()
+    if(not curr_lection_prg.unlocked):
+        messages.error(request, "Diese Übung ist noch nicht freigeschaltet!")
+        return redirect(lesson_overview)
+    
+    if(curr_lection_prg.get_tmp_prg() == 10): #number of questions can be adjusted here. 10 -> leads to 5 questions
+        curr_lection_prg.reset_tmp_prg()
+        messages.success(request, "Übung {0} erfolgreich beendet!".format(lection_id))
+        return redirect(lesson_overview)
+    else:
+        curr_lection_prg.increase_tmp_prg()
+
+
     if request.method == "GET":
         
         streak, _ = Streak.objects.get_or_create(user=request.user)
         streak.add_time(str(datetime.now().today().date())+","+str(datetime.now().hour)+":00")
         
-        
-
         learn_modes = [multiple_choice, word_translation, listening_comprehension, speaking_exercice, build_sentence]  # place other learn methods as function here:
         random_choice = learn_modes[random.randint(0, len(learn_modes) - 1 )]
-        return random_choice(request)
+        return random_choice(request, lection_id)
    
         
     elif request.method == "POST":
@@ -53,20 +78,21 @@ def learn(request, id):
         
         match learn_mode:
             case "multiple_choice":
-                return eval_multiple_choice(request, word)
+                return eval_multiple_choice(request, word, lection_id)
             case "word_translation":
-                return eval_word_translation(request, word)
+                return eval_word_translation(request, word, lection_id)
             case "listening_comprehension":
-                return eval_listening_comprehension(request, word)
+                return eval_listening_comprehension(request, word, lection_id)
             case "speaking_exercice":
-                return eval_speaking_exercice(request, word)
+                return eval_speaking_exercice(request, word, lection_id)
             # and here for evaluation:
      
 
         
-def build_sentence(request): 
+def build_sentence(request, lection_id): 
             if request.method == "GET":    
-                sentence = random.sample(list(Sentence.objects.all()), 1)[0]
+                sentence = random.sample(list(Sentence.objects.filter(lection=lection_id)), 1)[0]
+                print(sentence.lection)
                 template = "app/build_sentence.html"
                 words = sentence.get_words_en()
                 context = {"sentence": sentence.sentence_de, "words":words, "htmx_url": 'push_word', "pk": sentence.id, "target_id": "#word-container"}        
@@ -108,6 +134,8 @@ def push__or_eval_word(request, action=None, index=None):
                     print(selected_words)
                     sentence = Sentence.objects.get(pk=int(request.POST['pk']))
                     solution = sentence.return_solution(selected_words)
+                    lection_id = sentence.lection
+                    print("Value for lection id:", lection_id)
                     progress_obj, _ = ProgressSentence.objects.get_or_create(user=request.user, sentence=sentence)
                     
                     if solution:
@@ -117,13 +145,14 @@ def push__or_eval_word(request, action=None, index=None):
                     else:
                         progress_obj.decrease()
                         messages.error(request, "Das war leider falsch!")
-                    return HttpResponseClientRedirect("learn")
+                    return HttpResponseClientRedirect(str(lection_id)) # changed this from "learn" to str(lection_id) to get back to sub-url containing lesson index
+                    #return redirect("learn", lection_id)
 
                                     
 
-def multiple_choice(request):
+def multiple_choice(request, lection_id):
     """ Prepare a multiple choice question"""
-    words = random.sample(list(Word.objects.all()), 4) # pick 4 cards
+    words = random.sample(list(Word.objects.filter(lection=lection_id)), 4) # pick 4 cards
     
     cache.set('mode', 'multiple_choice', 300)
     cache.set("word", words[0].id)
@@ -135,7 +164,7 @@ def multiple_choice(request):
     return render(request, template,context={"question": question, 
                                              "possible_answers": possible_answers })
     
-def eval_multiple_choice(request, word: Word):
+def eval_multiple_choice(request, word: Word, lection_id):
     print(request.POST)
     progress_obj, _ = Progress.objects.get_or_create(user=request.user, word=word)
 
@@ -147,13 +176,13 @@ def eval_multiple_choice(request, word: Word):
     else:
         messages.error(request, "Das war leider falsch!")
         progress_obj.decrease()
-    return redirect("learn")
+    return redirect("learn", lection_id)
 
         
 
 
-def word_translation(request):
-    word = Word.objects.all().order_by('?').first()
+def word_translation(request, lection_id):
+    word = Word.objects.filter(lection=lection_id).order_by('?').first()
     cache.set('mode', 'word_translation', 30)
     cache.set("word", word.pk)
     
@@ -162,19 +191,20 @@ def word_translation(request):
     template = "app/translate_word.html"
     return render(request, template,context={"question": question} )
 
-def eval_word_translation(request, word: Word):
-    return eval_multiple_choice(request, word)
+def eval_word_translation(request, word: Word, lection_id):
+    return eval_multiple_choice(request, word, lection_id)
 
 
 
 
-def listening_comprehension(request):
+def listening_comprehension(request, lection_id):
 
-    word = Word.objects.all().order_by('?').first()
+    word = Word.objects.filter(lection=lection_id).order_by('?').first()
     cache.set('mode', 'listening_comprehension', 30)
     cache.set("word", word.pk)
 
     question = word.word
+    print("Word:", word.word, "Translation:", word.translation)
     tts = gTTS(question)
     print("saving file..")
     
@@ -185,7 +215,7 @@ def listening_comprehension(request):
     template = "app/listening_comprehension.html"
     return render(request, template, context={"question": question})
 
-def eval_listening_comprehension(request, word: Word):
+def eval_listening_comprehension(request, word: Word, lection_id):
     print(request.POST)
     progress_obj, _ = Progress.objects.get_or_create(user=request.user, word=word)
 
@@ -196,11 +226,11 @@ def eval_listening_comprehension(request, word: Word):
     else:
         messages.error(request, "Das war leider falsch!")
         progress_obj.decrease()
-    return redirect("learn")
+    return redirect("learn", lection_id)
 
 
-def speaking_exercice(request):
-    word = Word.objects.all().order_by('?').first()
+def speaking_exercice(request, lection_id):
+    word = Word.objects.filter(lection=lection_id).order_by('?').first()
     cache.set('mode', 'speaking_exercice', 30)
     cache.set("word", word.pk)
     
@@ -210,7 +240,7 @@ def speaking_exercice(request):
     template = "app/speaking_exercice.html"
     return render(request, template,context={"question": question} )
 
-def eval_speaking_exercice(request, word: Word):
+def eval_speaking_exercice(request, word: Word, lection_id):
     print(request.POST)
     progress_obj, _ = Progress.objects.get_or_create(user=request.user, word=word)
 
@@ -222,4 +252,4 @@ def eval_speaking_exercice(request, word: Word):
     else:
         messages.error(request, "Das war leider falsch!")
         progress_obj.decrease()
-    return redirect("learn")
+    return redirect("learn", lection_id)

@@ -22,6 +22,7 @@ class Word(models.Model):
         ("8","interjection"),
         ("9","determiner"))
     part_of_speech = models.CharField(choices=WORD_CHOICES, max_length=1)
+    lection = models.PositiveIntegerField(default=1)
     
     def __str__(self):
         return self.word +": "+self.translation
@@ -30,6 +31,7 @@ class Word(models.Model):
 class Sentence(models.Model):
     sentence_en = models.CharField(max_length=500)
     sentence_de = models.CharField(max_length=500)
+    lection = models.PositiveIntegerField(default=1)
     
     def get_words_en(self):
         words = re.sub(r'[^\w\s]', '', self.sentence_en).split(" ")
@@ -127,11 +129,30 @@ class LectionProgress(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
 
     progress = models.FloatField( validators=[MinValueValidator(0.0), MaxValueValidator(1.0)])
+
+    unlocked = models.BooleanField(default=False)
+    tmp_lection_prg = models.PositiveIntegerField(default=0)
+
+    def unlock(self):
+        self.unlocked = True
+        self.save()
+
+    def increase_tmp_prg(self):
+        self.tmp_lection_prg = self.tmp_lection_prg + 1
+        self.save()
+
+    def reset_tmp_prg(self):
+        self.tmp_lection_prg = 0
+        self.save()
+
+    def get_tmp_prg(self):
+        return self.tmp_lection_prg
+    
     
     def get_progress(self):
         return self.progress
     def __str__(self):
-        return "Vortschritt in Lektion {0} für {1}".format(self.lection_number, self.user)
+        return "Fortschritt in Lektion {0} für {1}".format(self.lection_number, self.user)
 
 
 class Progress(models.Model):

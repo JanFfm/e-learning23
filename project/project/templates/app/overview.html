@@ -6,13 +6,16 @@
 Hello {{ user }}!
 </p>
 
-<p>
-    <a href="{% url 'learn' 1 %}">Lektion 1!</a>
-</p>
-
-<p>
-    <a href="{% url 'learn' 2 %}">Lektion 2!</a>
-</p>
-
+    {% for lection in lection_progress %}
+        {% if lection.unlocked %}
+            <p> 
+                <a href="{% url 'learn' lection.id%}">Lektion {{lection.id}}!</a>
+            </p>
+        {%else%}
+            <p> 
+                <a href="{% url 'learn' lection.id%}">Lektion {{lection.id}} noch nicht freigeschaltet!</a>
+            </p>
+        {%endif%}        
+    {% endfor %}
 
 {% endblock %}
