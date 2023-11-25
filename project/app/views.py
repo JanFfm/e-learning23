@@ -21,6 +21,8 @@ def homepage(request):
         for lection in get_all_lections:
             num = lection['lection']
             lp, created = LectionProgress.objects.get_or_create(lection_number=num, user=request.user)
+            if num == 1:
+                lp.unlock = True
         
         time_stamp,_ = TimeStamp.objects.get_or_create(date=datetime.now().today().date(), hour=datetime.now().hour) 
         users_streaks, created = Streaks.objects.get_or_create(user=request.user)        
@@ -52,9 +54,11 @@ def lesson_overview(request):
     if request.method == "GET":
         
         lection_progress = LectionProgress.objects.all().filter(user=request.user).order_by('id')
+        for lp in lection_progress:
+            lp.calc_progress(user=request.user)
         
         for i in range(len(lection_progress)):
-            if lection_progress[i].get_progress() > 0.95:
+            if lection_progress[i].get_progress() > 0.3:
                 if i+1 <= len(lection_progress):
                     lection_progress[i+1].unlock()
             
@@ -133,14 +137,16 @@ def set_time_stamp(user):
         time_stamp.save() 
     return time_stamp         
 
-def set_answer_statistics(user, correct):
+def set_answer_statistics(user, correct=True):
     time_stamp = set_time_stamp(user)
-    progress_per_hour, = ProgressPerHour.objects.get_or_create(user=user, )
+    progress_per_hour, _= ProgressPerHour.objects.get_or_create(user=user,time_stamp=time_stamp )
     if correct:
-        pass
+        progress_per_hour.correct_count += 1
+        progress_per_hour.count += 1
     else:
-        pass
-                  
+        progress_per_hour.count += 1
+    progress_per_hour.save()
+
 
 
 @login_required
@@ -180,10 +186,14 @@ def push__or_eval_word(request, action=None, index=None):
                     
                     if solution:
                         progress_obj.increase()
+                        set_answer_statistics(request.user)               
+
                         messages.success(request, "Das war richtig.")
 
                     else:
                         progress_obj.decrease()
+                        set_answer_statistics(request.user, False)               
+
                         messages.error(request, "Das war leider falsch!")
                     return HttpResponseClientRedirect(str(lection_id)) # changed this from "learn" to str(lection_id) to get back to sub-url containing lesson index
                     #return redirect("learn", lection_id)
@@ -212,9 +222,13 @@ def eval_multiple_choice(request, word: Word, lection_id):
     print(answer)
     if answer.lower()  == word.translation.lower():
         messages.success(request, "Das war richtig.")
+        set_answer_statistics(request.user)               
+
         progress_obj.increase()
     else:
         messages.error(request, "Das war leider falsch!")
+        set_answer_statistics(request.user, False)               
+
         progress_obj.decrease()
     return redirect("learn", lection_id)
 
@@ -261,10 +275,14 @@ def eval_listening_comprehension(request, word: Word, lection_id):
 
     answer = request.POST['answer']
     if answer.lower()  == word.translation.lower():
+        set_answer_statistics(request.user)               
+
         messages.success(request, "Das war richtig.")
         progress_obj.increase()
     else:
         messages.error(request, "Das war leider falsch!")
+        set_answer_statistics(request.user, False)               
+
         progress_obj.decrease()
     return redirect("learn", lection_id)
 
@@ -287,9 +305,13 @@ def eval_speaking_exercice(request, word: Word, lection_id):
     answer = request.POST['ans']
     print("This was the answer", answer)
     if answer.lower()  == word.word.lower():
+        set_answer_statistics(request.user, False)               
+
         messages.success(request, "Das war richtig.")
         progress_obj.increase()
     else:
         messages.error(request, "Das war leider falsch!")
+        set_answer_statistics(request.user)               
+
         progress_obj.decrease()
     return redirect("learn", lection_id)
