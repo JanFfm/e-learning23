@@ -191,7 +191,7 @@ class LectionProgress(models.Model):
     lection_number = models.IntegerField()
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
 
-    progress = models.FloatField( validators=[MinValueValidator(0.0), MaxValueValidator(1.0)])
+    progress = models.FloatField( validators=[MinValueValidator(0.0), MaxValueValidator(1.0)], default=0)
 
     unlocked = models.BooleanField(default=False)
     tmp_lection_prg = models.PositiveIntegerField(default=0)

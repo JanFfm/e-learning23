@@ -16,6 +16,12 @@ import pyttsx3
 @login_required
 def homepage(request):
     if request.method =="GET":
+        #setup lections:
+        get_all_lections = list(Word.objects.values('lection').distinct())
+        for lection in get_all_lections:
+            num = lection['lection']
+            lp, created = LectionProgress.objects.get_or_create(lection_number=num, user=request.user)
+        
         time_stamp,_ = TimeStamp.objects.get_or_create(date=datetime.now().today().date(), hour=datetime.now().hour) 
         users_streaks, created = Streaks.objects.get_or_create(user=request.user)        
        
