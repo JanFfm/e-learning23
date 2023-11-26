@@ -8,6 +8,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import JSONField
 from datetime import datetime, timedelta
 
+
+
 class Word(models.Model):
     
     word = models.CharField(max_length=300)
@@ -67,6 +69,7 @@ class TimeStamp(models.Model):
     
     class Meta:
         unique_together = ('date', 'hour')
+        ordering = ('date', 'hour')
     
     def calculate_time_difference(self, other):
         my_time = datetime.combine(self.date, datetime.min.time()) + timedelta(hours=self.hour)
@@ -138,7 +141,7 @@ class ProgressPerHour(models.Model):
 
     class Meta:
         unique_together = ('user', 'time_stamp')
-        ordering = ('user', 'time_stamp')
+        ordering = ('time_stamp',)
 
 
     
@@ -157,12 +160,18 @@ class LectionProgress(models.Model):
         hundret_percent = (len(words_in_lection)+ len(sentences_in_lection)) * 10 + 0.000001
         progress_count = 0
         for w in words_in_lection:
-            p = Progress.objects.get(word=w, user=user)            
-            progress_count += p.progress
+            try:
+                p = Progress.objects.get(word=w, user=user)            
+                progress_count += p.progress
+            except:
+                pass
         for s in sentences_in_lection:
-            p = ProgressSentence.objects.get(sentence=s, user=user)            
-            progress_count += p.progress
-            print(progress_count , hundret_percent, progress_count / hundret_percent)
+            try:
+                p = ProgressSentence.objects.get(sentence=s, user=user)            
+                progress_count += p.progress
+                print(progress_count , hundret_percent, progress_count / hundret_percent)
+            except:
+                pass
         self.progress = progress_count / hundret_percent
         self.save()
 

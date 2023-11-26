@@ -11,7 +11,23 @@ from gtts import gTTS
 from io import BytesIO
 import speech_recognition as sr
 import pyttsx3
+import matplotlib.pyplot as plt
+from .draw import get_time_char, get_best_of_this_hour
 
+@login_required
+def statistics(request):
+    template = "app/statistics.html"
+    user_stat_over_time = ProgressPerHour.objects.filter(user=request.user)
+    user_stat_over_time = get_time_char(user_stat_over_time)
+    
+    best_of = get_best_of_this_hour(request.user)
+    
+    streak_ranking = None
+    hour_ranking = None
+    
+    context = {'user_stat_over_time':user_stat_over_time,
+               'best_of':best_of}
+    return render(request=request, template_name=template, context=context)
 
 @login_required
 def homepage(request):
@@ -21,8 +37,7 @@ def homepage(request):
         for lection in get_all_lections:
             num = lection['lection']
             lp, created = LectionProgress.objects.get_or_create(lection_number=num, user=request.user)
-            if num == 1:
-                lp.unlock = True
+         
         
         time_stamp,_ = TimeStamp.objects.get_or_create(date=datetime.now().today().date(), hour=datetime.now().hour) 
         users_streaks, created = Streaks.objects.get_or_create(user=request.user)        
@@ -58,6 +73,9 @@ def lesson_overview(request):
             lp.calc_progress(user=request.user)
         
         for i in range(len(lection_progress)):
+            if lection_progress[i].lection_number  == 1:
+                lection_progress[i].unlock()
+            
             if lection_progress[i].get_progress() > 0.3:
                 if i+1 <= len(lection_progress):
                     lection_progress[i+1].unlock()

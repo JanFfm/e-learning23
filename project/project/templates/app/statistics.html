@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+Deine Aktuelle Statistik:<br>
+<img src="data:image/png;base64,{{user_stat_over_time}}" alt="Plot"><br>
+
+
+%-Richtige pro user in dieser Stunde:
+<img src="data:image/png;base64,{{best_of}}" alt="Plot"><br>
+
+{% endblock %}
