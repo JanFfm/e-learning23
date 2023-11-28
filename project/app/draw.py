@@ -54,23 +54,30 @@ def get_best_of_this_hour(this_user):
     this_users_ratio = 0
     for p in nearest_progresses:
         try:
-            ratios_per_user.append((p.correct_count/p.count, p.user.username))
+           
             if p.user.username == this_user.username:
+                ratios_per_user.append((p.correct_count/p.count, p.user.username, "r"))
                 this_users_ratio = p.correct_count/p.count
+            else: 
+                ratios_per_user.append((p.correct_count/p.count, p.user.username, "g"))
         except ZeroDivisionError:
-            ratios_per_user.append((0, p.user.username))
+                if p.user.username == this_user.username:
+                    ratios_per_user.append((0, p.user.username, "r"))
+                    this_users_ratio =0
+                else: 
+                    ratios_per_user.append((0, p.user.username, "g"))
     try:
         ratios_and_users = sorted(ratios_per_user, key=lambda x: x[0])
         if len(ratios_per_user) > 5:
             ratios_and_users  = ratios_and_users[-5:]
-        ratios, users  = zip(*ratios_and_users)
+        ratios, users, color   = zip(*ratios_and_users)
    
         if len(ratios) > 1: 
             print(this_users_ratio)
             if this_user.username not in users:
                 ratios= (this_users_ratio,) + ratios 
                 users = (this_user.username,) + users
-            plt.bar(users, ratios)
+            plt.bar(users, ratios, color=color)
             #plt.xticks(users)
 
             image_stream = BytesIO()
