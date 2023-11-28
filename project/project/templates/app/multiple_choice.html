@@ -1,6 +1,12 @@
 {% extends 'app/question_mode.html' %}
-{% block card_title%}Was ist die richtige Antwort?{% endblock%}
+<body>
 
+{% block card_title %}
+    {# Set the value for my_title_variable here #}
+    {% with my_title_variable="Was ist die richtige Antwort?" %}
+        {{ block.super }}
+    {% endwith %}
+{% endblock %}
 
 {% block card %}
 <p>
@@ -15,5 +21,6 @@
 <label for="4">{{ possible_answers.3 }}</label><br>
 <br>
 <button  class="btn btn-primary" type="submit">Absenden</button><br>
+</body>
 
 {% endblock %}

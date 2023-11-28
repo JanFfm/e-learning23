@@ -11,9 +11,17 @@
 
     <form hx-post="{% url htmx_url %}"  hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' hx-target="{{target_id}}">
         <input type="hidden" id="pk" name="pk" value="{{pk}}">
-        <div class="card" style="width: 18rem;">
+        <div class="card" style="width: 50rem;">
             <div class="card-body">
-            <h5 class="card-title">{% block card_title%}Überschrift{% endblock%}</h5>
+            <h5 class="card-title">{% block card_title%}<header class="w3-container w3-green w3-center" style="padding:100 16px">
+                <div class="w3-container w3-green bg-primary text-white text-center">
+                    <div>
+                        <p class="w3-container w3-green" style="text-align:center; line-height:1.35em; font-size:40px;"> 
+                            <h1 class="w3-margin">{{ my_title_variable }}</h1>
+                        </p>
+                    </div>
+                </div>
+              </header>{% endblock%}</h5>
         {% csrf_token %}
         <p class="card-text">
         {% block card %}

@@ -1,21 +1,70 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<head>
+    <link rel="stylesheet" href="/media/roadmap.css">
+</head>
+<body>
+    <div class="bg-gradient_solid">
+        <header style="padding:128px 16px">
+            <div class="w3-content">
+                <div class="w3-twothird">
+                    <div class="text-center">
+                        <div>
+                            <h4 class="w3-margin w3-jumbo">Lektionenübersicht</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="w3-third w3-right">
+                    <img src="/media/cute_panda_bubble.png" alt="J.A.T." class = "img-header"/> 
+                    {% comment %} https://hotpot.ai/art-generator {% endcomment %}
+                </div>
+              {% comment %} </div> {% endcomment %}
+            </div>
+        </header>
+      <div class="container">
+        <div class="section-header"> 
+            <div class="text-center">
+                <h2>Mit welcher Lektion wollen wir weitermachen?</h2>
+            </div>
+          <hr>
+        </div>
+        <div class="steps">
+            {% for lection in lection_progress.reverse%}
+                <div class="steps-container">
+                    {% if lection.unlocked %}
+                        <div class="content">
+                            <p> 
+                                <h2>Lektion {{lection.lection_number}}</h2>
+                            </p>
+                            <p> Sie haben in dieser Lektion einmal bereits über 95% geschafft.hailudhsuiilhdlfhasdhaheudiuifgheshrgjjjfdjijrslhhel</p>
+                        </div>
+                        <i class="step-line"></i>
+                        <a href="{% url 'learn' lection.lection_number%}">
+                            <button class="date">
+                                <img src="/media/game_icon.svg" alt="buttonpng" border="0" />
+                            </button>
+                        </a>
+                    {%else%}
+                        <div class="content">
+                            <p> 
+                                <h2> Lektion {{lection.lection_number}} noch nicht freigeschaltet! </h2>
+                            </p>
+                            <p> Sie haben in dieser Lektion einmal bereits über 95% geschafft.hailudhsuiilhdlfhasdhaheudiuif hhhgheshrgjjjfdjijrhaiuhiuhiuhhl</p>
+                        </div>
+                        <i class="step-line"></i>
+                            <a href="{% url 'learn' lection.lection_number%}">
+                                <button class="date">
+                                    <img src="/media/gojo_icon.svg" alt="buttonpng" border="0" />
+                                </button>
+                            </a>
+                    {%endif%}   
+                </div>
+            {% endfor %}
 
-<p>
-Hello {{ user }}!
-</p>
+        </div>
+      </div>
+    </div>
 
-    {% for lection in lection_progress %}
-        {% if lection.unlocked %}
-            <p> 
-                <a href="{% url 'learn' lection.lection_number%}">Lektion {{lection.lection_number}}!</a>
-            </p>
-        {%else%}
-            <p> 
-                <a href="{% url 'learn' lection.lection_number%}">Lektion {{lection.lection_number}} noch nicht freigeschaltet!</a>
-            </p>
-        {%endif%}        
-    {% endfor %}
-
+</body>
 {% endblock %}
