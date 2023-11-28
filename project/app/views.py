@@ -12,7 +12,7 @@ from io import BytesIO
 import speech_recognition as sr
 import pyttsx3
 import matplotlib.pyplot as plt
-from .draw import get_time_char, get_best_of_this_hour
+from .draw import get_time_char, get_best_of_this_hour, get_streak_list
 
 @login_required
 def statistics(request):
@@ -20,13 +20,13 @@ def statistics(request):
     user_stat_over_time = ProgressPerHour.objects.filter(user=request.user)
     user_stat_over_time = get_time_char(user_stat_over_time)
     
-    best_of = get_best_of_this_hour(request.user)
-    
-    streak_ranking = None
-    hour_ranking = None
+    best_of = get_best_of_this_hour(request.user) 
+    streak_ranking = get_streak_list(request.user)  
+  
     
     context = {'user_stat_over_time':user_stat_over_time,
-               'best_of':best_of}
+               'best_of':best_of,
+               'streak_ranking':streak_ranking}
     return render(request=request, template_name=template, context=context)
 
 @login_required
