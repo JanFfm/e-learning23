@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+Deine Aktuelle Statistik:<br>
+<img src="data:image/png;base64,{{user_stat_over_time}}"><br>
+
+
+{% if best_of%}
+%-Richtige pro user in dieser Stunde:
+
+<img src="data:image/png;base64,{{best_of}}"><br>
+{% endif %}
+
+{% if streak_ranking %}
+<img src="data:image/png;base64,{{streak_ranking}}"><br>
+{% endif %}
+
+{% endblock %}

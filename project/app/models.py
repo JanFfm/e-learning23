@@ -8,6 +8,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import JSONField
 from datetime import datetime, timedelta
 
+
+
 class Word(models.Model):
     
     word = models.CharField(max_length=300)
@@ -26,7 +28,9 @@ class Word(models.Model):
     lection = models.PositiveIntegerField(default=1)
     
     def __str__(self):
-        return self.word +": "+self.translation
+        return self.word +": "+self.translation + " (Lektion: " + str(self.lection) +")"
+    class Meta:
+        ordering = ("lection", "word")
          
 
 class Sentence(models.Model):
@@ -50,50 +54,9 @@ class Sentence(models.Model):
          return self.sentence_en
 
 
-'''
-class Vocabulary(models.Model):
-    original_word = models.CharField(max_length=200)
-
-    right_translation = models.CharField(max_length=200)
-    wrong_aswers = models.JSONField() # for multiple choice
-    gap_text = models.CharField(max_length=200)
-    
-    def __str__(self):
-        return self.original_word+ ": " + self.right_translation
-    def easy(self):
-        """Einprägen
-        """
-        context = {
-            "pk": self.pk,
-            "original_word": self.original_word, 
-            "right_translation": self.right_translation
-        }
-        template = "app/reading.html"
-        return context, template
-    def middle(self):
-        """Multiple Choice
-        l : list of possible answers
-        """
-        l =self.wrong_aswers['0']
-        l.append(self.right_translation)
-        random.shuffle(l)
-        context = {
-            "pk": self.pk,
-            "data":l, 
-            "original_word": self.original_word}
-        template = "app/multiple_choice.html"
-        return context, template
 
 
-    def hard(self):
-        """Lückentext
-        """
-        context = {"pk": self.pk,
-                   "gap_text": self.gap_text}
-        template = "app/gap_text.html"
-        return context, template
 
-'''
 #ToDO: Rangliste für User per h
 # Gewichtete Fragen-Auswahl nach besten/schlechtesten
 # Steak
@@ -106,6 +69,7 @@ class TimeStamp(models.Model):
     
     class Meta:
         unique_together = ('date', 'hour')
+        ordering = ('date', 'hour')
     
     def calculate_time_difference(self, other):
         my_time = datetime.combine(self.date, datetime.min.time()) + timedelta(hours=self.hour)
@@ -165,24 +129,19 @@ class Streaks(models.Model):
             return True
 
         
-            
-        
-
-
-
     
 
 
 class ProgressPerHour(models.Model):
     time_stamp = models.ForeignKey(TimeStamp, on_delete=models.CASCADE, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
-    word_count = models.IntegerField()
-    correct_word_count = models.IntegerField()
+    count = models.IntegerField(default=0)
+    correct_count = models.IntegerField(default=0)
     
-    sentence_count = models.IntegerField()
-    correct_sentence_count = models.IntegerField()
+
     class Meta:
         unique_together = ('user', 'time_stamp')
+        ordering = ('time_stamp',)
 
 
     
@@ -191,10 +150,31 @@ class LectionProgress(models.Model):
     lection_number = models.IntegerField()
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
 
-    progress = models.FloatField( validators=[MinValueValidator(0.0), MaxValueValidator(1.0)])
+    progress = models.FloatField( validators=[MinValueValidator(0.0), MaxValueValidator(1.0)], default=0)
 
     unlocked = models.BooleanField(default=False)
     tmp_lection_prg = models.PositiveIntegerField(default=0)
+    def calc_progress(self, user):
+        words_in_lection = Word.objects.filter(lection=self.lection_number)
+        sentences_in_lection =Sentence.objects.filter(lection=self.lection_number)
+        hundret_percent = (len(words_in_lection)+ len(sentences_in_lection)) * 10 + 0.000001
+        progress_count = 0
+        for w in words_in_lection:
+            try:
+                p = Progress.objects.get(word=w, user=user)            
+                progress_count += p.progress
+            except:
+                pass
+        for s in sentences_in_lection:
+            try:
+                p = ProgressSentence.objects.get(sentence=s, user=user)            
+                progress_count += p.progress
+                print(progress_count , hundret_percent, progress_count / hundret_percent)
+            except:
+                pass
+        self.progress = progress_count / hundret_percent
+        self.save()
+
 
     def unlock(self):
         self.unlocked = True
@@ -235,7 +215,7 @@ class Progress(models.Model):
             self.save()
             
     def increase(self):
-          if self.progress < 9:
+          if self.progress < 11:
                 self.progress += 1
                 self.save()
 
