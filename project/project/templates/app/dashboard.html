@@ -11,7 +11,7 @@
             <p class="w3-container w3-green" style="text-align:center; line-height:1.35em; font-size:40px;"> 
                 <h1 class="w3-margin w3-jumbo">Hallo {{ user }}!</h1>
                 <p>
-                  {{streak_message}}. Du hast jetzt {{streak_count}} Stunden gelernt!<br>
+                  {{streak_message}} Du hast jetzt {{streak_count}} Stunden gelernt!<br>
                   
                   {% if longest_streak %}Deine längste streak war  {{ longest_streak }}{% endif %}
                   
@@ -52,7 +52,11 @@
             </span>
           </div>
           <div class="col-sm-4">
-            <a href="{% url 'statistics'%}"><h3>Persönliche Statistik</h3></a>
+            <p>
+              <a href="{% url 'statistics' %}">
+              <button class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Persönliche Statistik</button>
+              </a>
+            </p>
             <p>Neugierig, wie du dich bis jetzt geschlagen hast?</p>
           </div>
         </div>
