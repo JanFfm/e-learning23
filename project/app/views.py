@@ -162,7 +162,9 @@ def learn(request, lection_id):
 
         
 def build_sentence(request, lection_id): 
-            if request.method == "GET":    
+            if request.method == "GET":   
+                user_lives = UserSettings.objects.filter(user=request.user).first()
+ 
                 sentence_list = Sentence.objects.filter(lection=lection_id)
                 weigts_list = [s.weight(request.user) for s in sentence_list]
                 if sum(weigts_list) <= 0:
@@ -171,7 +173,7 @@ def build_sentence(request, lection_id):
                 print(sentence.lection)
                 template = "app/build_sentence.html"
                 words = sentence.get_words_en()
-                context = {"sentence": sentence.sentence_de, "words":words, "htmx_url": 'push_word', "pk": sentence.id, "target_id": "#word-container"}        
+                context = {"sentence": sentence.sentence_de,'user_lives':user_lives, "words":words, "htmx_url": 'push_word', "pk": sentence.id, "target_id": "#word-container"}        
        
                 return render(request, template, context)
                 
@@ -250,6 +252,9 @@ def push__or_eval_word(request, action=None, index=None):
 
 def multiple_choice(request, lection_id):
     """ Prepare a multiple choice question"""
+    user_lives = UserSettings.objects.filter(user=request.user).first()
+
+    
     word_list = list(Word.objects.filter(lection=lection_id))
     weigts_list = [w.weight(request.user) for w in word_list]
     if sum(weigts_list) <= 0:
@@ -264,7 +269,9 @@ def multiple_choice(request, lection_id):
     print(possible_answers)
     template = "app/multiple_choice.html"
     return render(request, template,context={"question": question, 
-                                             "possible_answers": possible_answers })
+                                             "possible_answers": possible_answers,
+                                              "user_lives":user_lives
+                                             })
     
 def eval_multiple_choice(request, word: Word, lection_id):
     print(request.POST)
@@ -290,6 +297,8 @@ def eval_multiple_choice(request, word: Word, lection_id):
 
 
 def word_translation(request, lection_id):
+    user_lives = UserSettings.objects.filter(user=request.user).first()
+
     #word = Word.objects.filter(lection=lection_id).order_by('?').first()
     word_list = list(Word.objects.filter(lection=lection_id))
     weigts_list = [w.weight(request.user) for w in word_list]
@@ -302,7 +311,8 @@ def word_translation(request, lection_id):
     question = word.word
     
     template = "app/translate_word.html"
-    return render(request, template,context={"question": question} )
+    
+    return render(request, template,context={"question": question, 'user_lives':user_lives} )
 
 def eval_word_translation(request, word: Word, lection_id):
     return eval_multiple_choice(request, word, lection_id)
@@ -330,9 +340,10 @@ def listening_comprehension(request, lection_id):
     #mp3_fp = BytesIO()
     #tts.write_to_fp(mp3_fp)
     tts.save('media/hello.mp3')
+    user_lives = UserSettings.objects.filter(user=request.user).first()
 
     template = "app/listening_comprehension.html"
-    return render(request, template, context={"question": question})
+    return render(request, template, context={"question": question, 'user_lives':user_lives})
 
 def eval_listening_comprehension(request, word: Word, lection_id):
     print(request.POST)
@@ -355,6 +366,8 @@ def eval_listening_comprehension(request, word: Word, lection_id):
 
 
 def speaking_exercice(request, lection_id):
+    user_lives = UserSettings.objects.filter(user=request.user).first()
+
     word = Word.objects.filter(lection=lection_id).order_by('?').first()
     cache.set('mode', 'speaking_exercice', 30)
     cache.set("word", word.pk)
@@ -363,7 +376,7 @@ def speaking_exercice(request, lection_id):
     question = word.translation
     
     template = "app/speaking_exercice.html"
-    return render(request, template,context={"question": question} )
+    return render(request, template,context={"question": question, 'user_lives':user_lives} )
 
 def eval_speaking_exercice(request, word: Word, lection_id):
     print(request.POST)

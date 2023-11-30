@@ -20,7 +20,7 @@
                             <div class="w3-container w3-green bg-primary text-white text-center">
                                 <div>
                                     <p class="w3-container w3-green w3-center" style="text-align:center; line-height:1.35em; font-size:40px;"> 
-                                        <h1 class="w3-margin">{{ my_title_variable }}</h1>
+                                        <h1 class="w3-margin">{{ my_title_variable }}        {{user_lives}}</h1>
                                     </p>
                                 </div>
                             </div>
@@ -28,6 +28,7 @@
                         {% endblock%}</h5>
                 {% csrf_token %}
                 <p class="card-text w3-center">
+             
                 {% block card %}
 
                 {% endblock %}
