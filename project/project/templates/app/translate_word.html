@@ -7,12 +7,16 @@
 {% endblock %}
 
 {% block card %}
+<h3 class="w3-margin">
 <p>
 {{ question }}</p>
 <label for="answer">Wie wird das Wort übersetzt?</label><br>
-<input type="text" id="answer" name="answer" required=""><br>
+<input type="text" id="answer" name="answer" ><br>
 </p>
+</h3>
+<div class = "w3-center">
 <p>
 <button name="subject" type="submit"  class="btn btn-primary">Absenden</button>
 </p>
+</div>
 {% endblock %}

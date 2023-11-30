@@ -9,9 +9,10 @@
 {% endblock %}
 
 {% block card %}
+<h3 class="w3-margin">
 <p>
 {{ question }} bedeutet: <br>
-<input type="radio" id="1" name="answer" value="{{ possible_answers.0 }}" required="">
+<input type="radio" id="1" name="answer" value="{{ possible_answers.0 }}">
 <label for="1">{{ possible_answers.0 }}</label><br>
 <input type="radio" id="2" name="answer" value="{{ possible_answers.1 }}">
 <label for="2">{{ possible_answers.1 }}</label><br>
@@ -20,7 +21,10 @@
 <input type="radio" id="3" name="answer" value="{{ possible_answers.3 }}">
 <label for="4">{{ possible_answers.3 }}</label><br>
 <br>
+</h3>
+<div class = "w3-center">
 <button  class="btn btn-primary" type="submit">Absenden</button><br>
+</div>
 </body>
 
 {% endblock %}

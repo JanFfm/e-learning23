@@ -8,11 +8,12 @@
 {% endblock %}
 
 {% block card %}
+<h3 class="w3-margin">
 <p>
 {{ original_word }} bedeutet:<br>
  {{ right_translation }}
 </p>
-
+</h3>
 <button name="reading" type="submit" class="btn btn-primary" value="1">Gewusst</button> <button name="reading" type="submit" class="btn btn-danger" value="0">Nicht gewusst</button>
 
 {% endblock %}
