@@ -1,5 +1,10 @@
 {% extends 'app/question_mode.html' %}
-{% block card_title%}Fülle die Lücke!{% endblock%}
+{% block card_title %}
+    {# Set the value for my_title_variable here #}
+    {% with my_title_variable="Fülle die Lücke aus!" %}
+        {{ block.super }}
+    {% endwith %}
+{% endblock %}
 
 {% block card %}
 <p>

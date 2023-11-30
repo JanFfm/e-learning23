@@ -1,6 +1,10 @@
 {% extends 'app/question_mode_htmx.html' %}
-{% block card_title%}Baue den Satz zusammen!{% endblock%}
-
+  {% block card_title %}
+  {# Set the value for my_title_variable here #}
+  {% with my_title_variable="Baue den Satz zusammen!" %}
+      {{ block.super }}
+  {% endwith %}
+{% endblock %}
 
 {% block card %}
 "{{ sentence }}"
@@ -10,9 +14,8 @@
  
 </div>
   <button type="submit" id="submit-button" hx-post="{% url 'push_word' 'check' 0 %}" hx-target="#words_to_choose"  hx-swap="innerHTML">Satz überprüfen</button>
+
 {% endblock %}
-
-
 
 
 

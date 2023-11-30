@@ -1,9 +1,21 @@
 
 {% extends 'app/question_mode.html' %}
+
+
 {% load static %}
-{% block card_title%}Fülle die Lücke!{% endblock%}
+
+
+{% block card_title %}
+    {# Set the value for my_title_variable here #}
+    {% with my_title_variable="Fülle die Lücke aus." %}
+        {{ block.super }}
+    {% endwith %}
+{% endblock %}
+
 
 {% block card %}
+
+<body>
 <p>
   <figure>
       <figcaption>Was für ein Wort hörst du?</figcaption>
@@ -19,4 +31,6 @@
 <p>
 <button name="subject" type="submit"  class="btn btn-primary">Absenden</button>
 </p>
+</body>
+
 {% endblock %}
