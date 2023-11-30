@@ -1,20 +1,41 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Deine Statistik</h1>
+<body>
+    <header style="padding:128px 16px">
+        <div class="w3-content">
+            <div class="w3-twothird">
+                <div class="text-center">
+                    <div>
+                        <h4 class="w3-margin w3-jumbo">Deine Statistik</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="w3-third w3-right">
+                <img src="/media/angry_panda.png" alt="J.A.T." class = "img-header"/> 
+                {% comment %} https://hotpot.ai/art-generator {% endcomment %}
+            </div>
+          {% comment %} </div> {% endcomment %}
+        </div>
+    </header>
 
-<h2>Dein Lernverlauf</h2>
-<img src="data:image/png;base64,{{user_stat_over_time}}"><br>
+<div class="w3-content">
+    <div class="w3-twothird">
+    <h2 class = "w3-center">Dein Lernverlauf</h2>
+    <img src="data:image/png;base64,{{user_stat_over_time}}"><br>
 
 
-{% if best_of%}
-<h2>Die besten User aktuell</h2>
+    {% if best_of%}
+    <h2 class = "w3-center">Die besten User aktuell</h2>
 
-<img src="data:image/png;base64,{{best_of}}"><br>
-{% endif %}
+    <img src="data:image/png;base64,{{best_of}}"><br>
+    {% endif %}
 
-{% if streak_ranking %}
-<h2>Wer lernt am längsten am Stück?</h2>
-<img src="data:image/png;base64,{{streak_ranking}}"><br>
-{% endif %}
+    {% if streak_ranking %}
+    <h2 class = "w3-center">Wer lernt am längsten am Stück?</h2>
+    <img src="data:image/png;base64,{{streak_ranking}}"><br>
+    {% endif %}
 
+    </div>
+</div>
+</body>
 {% endblock %}

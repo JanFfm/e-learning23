@@ -10,11 +10,11 @@
         <div>
             <p class="w3-container w3-green" style="text-align:center; line-height:1.35em; font-size:40px;"> 
                 <h1 class="w3-margin w3-jumbo">Hallo {{ user }}!</h1>
-                <p>
-                  {{streak_message}} Du hast jetzt {{streak_count}} Stunden gelernt!<br>
+                <p> <h2> <img src="/media/bamboo_icon.png" alt="Streak"/>
+                  {{streak_message}} Du hast jetzt {{streak_count}} Stunden gelernt! <img src="/media/bamboo_icon.png" alt="Streak"/> <br>
                   
-                  {% if longest_streak %}Deine längste streak war  {{ longest_streak }}{% endif %}
-                  
+                  {% if longest_streak %}Deine längste Streak war  {{ longest_streak }}!{% endif %}
+                </h2>
                   </p>
                 <h1>Womit willst du heute starten?</h1> 
             </p>
@@ -26,10 +26,13 @@
     <div class="w3-content">
       <div class="w3-twothird">
         <h1>Hallo, mein Name ist J.A.T.!</h1>
-        <h5 class="w3-padding-32">Während deiner Lernreise werd ich dich begleiten und deinen Fortschritt im Auge behalten.
+        <h5 class="w3-padding-32">Willkommen in der aufregenden Welt des Englischlernens! Während deiner Lernreise werd ich dich begleiten und deinen Fortschritt im Auge behalten.
           Wenn du bereit zum Lernen bist, klicke auf den Knopf.
         </h5>
-        <p class="w3-text-grey"> Und hier kommt noch ein Motivationstext</p>
+        <p class="w3-text-grey">Warum solltest du diese Sprache beherrschen? Ganz einfach: Englisch ist die globale Sprache der Kommunikation. Von den glitzernden Wolkenkratzern in New York bis zu den sonnendurchfluteten Stränden Australiens - überall auf der Welt wird Englisch gesprochen und verstanden. <br>
+          Unsere App ist dein treuer Begleiter auf diesem spannenden Weg. Mit modernsten Lernmethoden, maßgeschneiderten Übungen und interaktiven Inhalten machen wir das Lernen nicht nur effizienter, sondern auch unterhaltsamer. <br>
+          Wir glauben daran, dass Lernen eine Reise ist und dass wir dich auf jedem Schritt dieser Reise unterstützen können. Unsere Plattform bietet nicht nur die Chance, die Sprache zu meistern, sondern auch die Welt mit neuen Augen zu sehen und Verbindungen zu Menschen auf der ganzen Welt zu knüpfen. <br>
+          Springe jetzt in diese aufregende Reise und entdecke die endlosen Möglichkeiten, die dir das Beherrschen der englischen Sprache eröffnet. Lass uns gemeinsam diese Reise beginnen und deine Fähigkeiten auf ein neues Level bringen!</p>
       </div>
       <div class="w3-third w3-right">
         <img src="/media/cute_panda.jpg" alt="J.A.T."/> 
@@ -43,7 +46,7 @@
               </a> {% endcomment %}
             <p>
                 <a href="{% url 'overview' %}">
-                <button class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Zeit zum lernen!</button>
+                <button class="w3-button w3-black w3-padding-large w3-large w3-margin-top">Zeit zum Lernen!</button>
                 </a>
             </p>
             {% comment %} <h3><a href="{% url 'overview' %}">Zeit zum lernen!</a></h3> {% endcomment %}
