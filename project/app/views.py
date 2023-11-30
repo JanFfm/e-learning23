@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django_htmx.http import HttpResponseClientRedirect
 import random
 from datetime import datetime
-from .models import  Progress, Word, Sentence, ProgressSentence, Streaks, TimeStamp, ProgressPerHour, LectionProgress
+from .models import  Progress, Word, Sentence, ProgressSentence, Streaks, TimeStamp, ProgressPerHour, LectionProgress, UserSettings
 from gtts import gTTS
 from io import BytesIO
 import speech_recognition as sr
@@ -38,6 +38,9 @@ def homepage(request):
             num = lection['lection']
             lp, created = LectionProgress.objects.get_or_create(lection_number=num, user=request.user)
          
+        #setup user settings e.g. lives
+        user_set = UserSettings.objects.get_or_create(user=request.user)
+
         
         time_stamp,_ = TimeStamp.objects.get_or_create(date=datetime.now().today().date(), hour=datetime.now().hour) 
         users_streaks, created = Streaks.objects.get_or_create(user=request.user)        
@@ -62,15 +65,22 @@ def homepage(request):
             "date": datetime.now(),
         }
         return render(request,"app/dashboard.html", context)
-    
+   
 
 @login_required
 def lesson_overview(request):
     if request.method == "GET":
         
-        lection_progress = LectionProgress.objects.all().filter(user=request.user).order_by('id')
+        user_lives = UserSettings.objects.filter(user=request.user).first()
+        if user_lives.is_timer_up():
+            user_lives.increase_lives()
+            if user_lives.get_lives() < 5:
+                user_lives.set_timer()
+
+        lection_progress = LectionProgress.objects.all().filter(user=request.user).order_by('id')    
         for lp in lection_progress:
             lp.calc_progress(user=request.user)
+            lp.reset_tmp_prg()
         
         for i in range(len(lection_progress)):
             if lection_progress[i].lection_number  == 1:
@@ -79,18 +89,27 @@ def lesson_overview(request):
             if lection_progress[i].get_progress() > 0.3:
                 if i+1 <= len(lection_progress):
                     lection_progress[i+1].unlock()
-            
-    
-       # print(lection_progress.get(user=request.user, lection_number=1).get_progress())
         context = {
             "lection_progress": lection_progress,
+            "lives"           : user_lives,
                    }
         return render(request, "app/overview.html", context)
 
 
 @login_required
 def learn(request, lection_id):
+    
+    user_lives = UserSettings.objects.filter(user=request.user).first()
+    if user_lives.is_timer_up():
+        user_lives.increase_lives()
+        if user_lives.get_lives() < 5:
+            user_lives.set_timer()
 
+    if user_lives.get_lives() <= 0 and (int(lection_id) != 1 and int(lection_id) != 2):
+        messages.error(request, "Du hast kein Leben mehr übrig. Wähle eine der ersten Übungen aus, um wieder Leben zu erhalten oder warte 10 Minuten!")
+
+        return redirect(lesson_overview)
+    
     #TODO maybe a total of 15 question and the return to main menu?
     curr_lection_prg = LectionProgress.objects.filter(user=request.user, lection_number=lection_id).first()
     if(not curr_lection_prg.unlocked):
@@ -100,6 +119,11 @@ def learn(request, lection_id):
     if(curr_lection_prg.get_tmp_prg() == 10): #number of questions can be adjusted here. 10 -> leads to 5 questions
         curr_lection_prg.reset_tmp_prg()
         messages.success(request, "Übung {0} erfolgreich beendet!".format(lection_id))
+
+        if (int(lection_id) == 1 or int(lection_id) == 2) and user_lives.get_lives() < 5:
+            user_lives.increase_lives()
+            messages.success(request, "Glückwunsch, du hast ein Leben zurückgewonnen!")
+
         return redirect(lesson_overview)
     else:
         curr_lection_prg.increase_tmp_prg()
@@ -139,7 +163,9 @@ def learn(request, lection_id):
         
 def build_sentence(request, lection_id): 
             if request.method == "GET":    
-                sentence = random.sample(list(Sentence.objects.filter(lection=lection_id)), 1)[0]
+                sentence_list = Sentence.objects.filter(lection=lection_id)
+                weigts_list = [s.weight(request.user) for s in sentence_list]
+                sentence = random.choices(sentence_list,weights=weigts_list, k=1)[0] #
                 print(sentence.lection)
                 template = "app/build_sentence.html"
                 words = sentence.get_words_en()
@@ -201,7 +227,8 @@ def push__or_eval_word(request, action=None, index=None):
                     lection_id = sentence.lection
                     print("Value for lection id:", lection_id)
                     progress_obj, _ = ProgressSentence.objects.get_or_create(user=request.user, sentence=sentence)
-                    
+                    user_lives = UserSettings.objects.filter(user=request.user).first()
+                    print("User lives:", user_lives.get_lives())
                     if solution:
                         progress_obj.increase()
                         set_answer_statistics(request.user)               
@@ -211,7 +238,8 @@ def push__or_eval_word(request, action=None, index=None):
                     else:
                         progress_obj.decrease()
                         set_answer_statistics(request.user, False)               
-
+                        user_lives.decrease_lives()
+                        user_lives.set_timer()
                         messages.error(request, "Das war leider falsch!")
                     return HttpResponseClientRedirect(str(lection_id)) # changed this from "learn" to str(lection_id) to get back to sub-url containing lesson index
                     #return redirect("learn", lection_id)
@@ -220,7 +248,9 @@ def push__or_eval_word(request, action=None, index=None):
 
 def multiple_choice(request, lection_id):
     """ Prepare a multiple choice question"""
-    words = random.sample(list(Word.objects.filter(lection=lection_id)), 4) # pick 4 cards
+    word_list = list(Word.objects.filter(lection=lection_id))
+    weigts_list = [w.weight(request.user) for w in word_list]
+    words = random.choices(word_list,weights=weigts_list, k=4) # pick 4 cards
     
     cache.set('mode', 'multiple_choice', 300)
     cache.set("word", words[0].id)
@@ -235,7 +265,8 @@ def multiple_choice(request, lection_id):
 def eval_multiple_choice(request, word: Word, lection_id):
     print(request.POST)
     progress_obj, _ = Progress.objects.get_or_create(user=request.user, word=word)
-
+    user_lives = UserSettings.objects.filter(user=request.user).first()
+    print("User lives:", user_lives.get_lives())
     answer = request.POST['answer']
     print(answer)
     if answer.lower()  == word.translation.lower():
@@ -246,7 +277,8 @@ def eval_multiple_choice(request, word: Word, lection_id):
     else:
         messages.error(request, "Das war leider falsch!")
         set_answer_statistics(request.user, False)               
-
+        user_lives.decrease_lives()
+        user_lives.set_timer()
         progress_obj.decrease()
     return redirect("learn", lection_id)
 
@@ -254,7 +286,10 @@ def eval_multiple_choice(request, word: Word, lection_id):
 
 
 def word_translation(request, lection_id):
-    word = Word.objects.filter(lection=lection_id).order_by('?').first()
+    #word = Word.objects.filter(lection=lection_id).order_by('?').first()
+    word_list = list(Word.objects.filter(lection=lection_id))
+    weigts_list = [w.weight(request.user) for w in word_list]
+    word = random.choices(word_list,weights=weigts_list, k=1)[0] #
     cache.set('mode', 'word_translation', 30)
     cache.set("word", word.pk)
     
@@ -271,7 +306,11 @@ def eval_word_translation(request, word: Word, lection_id):
 
 def listening_comprehension(request, lection_id):
 
-    word = Word.objects.filter(lection=lection_id).order_by('?').first()
+    #word = Word.objects.filter(lection=lection_id).order_by('?').first()
+    word_list = list(Word.objects.filter(lection=lection_id))
+    weigts_list = [w.weight(request.user) for w in word_list]    
+    word = random.choices(word_list,weights=weigts_list, k=1)[0] #
+    
     cache.set('mode', 'listening_comprehension', 30)
     cache.set("word", word.pk)
 
@@ -290,7 +329,8 @@ def listening_comprehension(request, lection_id):
 def eval_listening_comprehension(request, word: Word, lection_id):
     print(request.POST)
     progress_obj, _ = Progress.objects.get_or_create(user=request.user, word=word)
-
+    user_lives = UserSettings.objects.filter(user=request.user).first()
+    print("User lives:", user_lives.get_lives())
     answer = request.POST['answer']
     if answer.lower()  == word.translation.lower():
         set_answer_statistics(request.user)               
@@ -300,7 +340,8 @@ def eval_listening_comprehension(request, word: Word, lection_id):
     else:
         messages.error(request, "Das war leider falsch!")
         set_answer_statistics(request.user, False)               
-
+        user_lives.decrease_lives()
+        user_lives.set_timer()
         progress_obj.decrease()
     return redirect("learn", lection_id)
 
@@ -319,7 +360,8 @@ def speaking_exercice(request, lection_id):
 def eval_speaking_exercice(request, word: Word, lection_id):
     print(request.POST)
     progress_obj, _ = Progress.objects.get_or_create(user=request.user, word=word)
-
+    user_lives = UserSettings.objects.filter(user=request.user).first()
+    print("User lives:", user_lives.get_lives())
     answer = request.POST['ans']
     print("This was the answer", answer)
     if answer.lower()  == word.word.lower():
@@ -330,6 +372,7 @@ def eval_speaking_exercice(request, word: Word, lection_id):
     else:
         messages.error(request, "Das war leider falsch!")
         set_answer_statistics(request.user)               
-
+        user_lives.decrease_lives()
+        user_lives.set_timer()
         progress_obj.decrease()
     return redirect("learn", lection_id)

@@ -7,6 +7,7 @@ import string
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import JSONField
 from datetime import datetime, timedelta
+from django.utils import timezone
 
 
 
@@ -26,7 +27,26 @@ class Word(models.Model):
         ("9","determiner"))
     part_of_speech = models.CharField(choices=WORD_CHOICES, max_length=1)
     lection = models.PositiveIntegerField(default=1)
-    
+    def weight(self, user):
+        progress, _ = Progress.objects.get_or_create(word=self, user=user)
+        time_stamp, _ = TimeStamp.objects.get_or_create(date=datetime.now().today().date(), hour=datetime.now().hour) 
+        progres_time_stamp, _ = TimeStamp.objects.get_or_create(date=progress.last_time_learned.date(), hour=progress.last_time_learned.hour)
+        time_difference = time_stamp.calculate_time_difference(progres_time_stamp)
+        if time_difference <= 1:
+            weight = 10
+        elif 1 < time_difference <= 4:
+            weight = 8
+        elif 4 < time_difference <= 8:
+            weight = 6
+        elif 8 < time_difference <= 16:
+            weight = 4
+        else:
+            weight = 2
+        weight = 20 /( progress.progress + weight)
+        return weight        
+        
+        
+        
     def __str__(self):
         return self.word +": "+self.translation + " (Lektion: " + str(self.lection) +")"
     class Meta:
@@ -48,10 +68,30 @@ class Sentence(models.Model):
         if words == selection:
             return True
         return False
+    def weight(self, user):
+        progress, _ = ProgressSentence.objects.get_or_create(sentence=self, user=user)
+        time_stamp, _ = TimeStamp.objects.get_or_create(date=datetime.now().today().date(), hour=datetime.now().hour) 
+        progres_time_stamp, _ = TimeStamp.objects.get_or_create(date=progress.last_time_learned.date(), hour=progress.last_time_learned.hour)
+        time_difference = time_stamp.calculate_time_difference(progres_time_stamp)
+        if time_difference <= 1:
+            weight = 2
+        elif 1 < time_difference <= 4:
+            weight = 4
+        elif 4 < time_difference <= 8:
+            weight = 6
+        elif 8 < time_difference <= 16:
+            weight = 8
+        else:
+            weight = 9
+        p = progress.progress / 11
+        weight = weight * p
+        return weight        
+        
            
     
     def __str__(self):
          return self.sentence_en
+     
 
 
 
@@ -136,8 +176,7 @@ class ProgressPerHour(models.Model):
     time_stamp = models.ForeignKey(TimeStamp, on_delete=models.CASCADE, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     count = models.IntegerField(default=0)
-    correct_count = models.IntegerField(default=0)
-    
+    correct_count = models.IntegerField(default=0)   
 
     class Meta:
         unique_together = ('user', 'time_stamp')
@@ -202,7 +241,10 @@ class Progress(models.Model):
     word = models.ForeignKey(Word, on_delete=models.CASCADE, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     progress = models.IntegerField(default=0)
+    last_time_learned = models.DateTimeField(auto_now=True)
     
+
+
     class Meta:
             unique_together = (('word', 'user'),)
     def __str__(self):
@@ -224,4 +266,56 @@ class ProgressSentence(Progress):
     sentence = models.ForeignKey(Sentence, on_delete=models.CASCADE, null=True)
     word = None
 
+
+class UserSettings(models.Model):
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, unique=True)
+    lives = models.PositiveSmallIntegerField(default=5)
+    timer = models.DateTimeField(null=True)
+
+    def set_timer(self):
+        if self.timer is None:
+            self.timer = timezone.now()
+            self.save()
+        else:
+            print("Timer has already a set time")
     
+    def is_timer_up(self) -> bool:
+        if self.timer == None:
+            return False
+        now = timezone.now()
+        ten_min = timedelta(minutes=10)
+        print("This worked")
+        if  now - ten_min > self.timer:
+            print("Deleted current timer")
+            self.timer = None
+            self.save()
+            return True
+        else:
+            return False
+
+    def time_left(self):
+        if self.timer != None and  not (timezone.now() - timedelta(minutes=10) > self.timer):
+            rem = self.timer + timedelta(minutes=10) - timezone.now()
+            return rem.seconds // 60 % 60
+        else:
+            return "0"
+
+    def increase_lives(self):
+        if self.lives < 5:
+            self.lives += 1
+            self.save()
+        
+    def decrease_lives(self):
+        if self.lives > 0:
+            self.lives -= 1
+            self.save()
+
+    def get_lives(self):
+        return self.lives
+
+    class Meta:
+        ordering = ('user',)
+
+    def __str__(self):
+        return "User: " + str(self.user) + ", Anzahl Leben: " + str(self.lives)

@@ -1,4 +1,7 @@
 {% extends 'app/question_mode_htmx.html' %}
+
+{% load static %}
+
   {% block card_title %}
   {# Set the value for my_title_variable here #}
   {% with my_title_variable="Baue den Satz zusammen!" %}
@@ -7,13 +10,18 @@
 {% endblock %}
 
 {% block card %}
-"{{ sentence }}"
+<body>
+  <h3 class="w3-margin">
+  "{{ sentence }}"
 
-<div id="word-container">
-  {% include "app/partials/sentence_building_partial.html" %}
- 
-</div>
-  <button type="submit" id="submit-button" hx-post="{% url 'push_word' 'check' 0 %}" hx-target="#words_to_choose"  hx-swap="innerHTML">Satz überprüfen</button>
+  <div id="word-container">
+    {% include "app/partials/sentence_building_partial.html" %}
+  </div>
+  <div class = "w3-center">
+    <button class="btn btn-primary" type="submit" id="submit-button" hx-post="{% url 'push_word' 'check' 0 %}" hx-target="#words_to_choose"  hx-swap="innerHTML">Satz überprüfen</button>
+  </div>
+  </h3>
+</body>     
 
 {% endblock %}
 
@@ -25,7 +33,6 @@
 {% block scripts %}
 <script>
 
-     
 
 {% endblock %}
 

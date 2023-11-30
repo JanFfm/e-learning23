@@ -31,13 +31,10 @@
 <body  hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
 <!-- Navbar -->
-<div class="w3-top">
-  <div class="w3-bar w3-green w3-card w3-left-align w3-large">
+{% comment %} <div class="w3-top">
+  <div class="w3-bar w3-card w3-left-align w3-large">
     <a class="w3-bar-item w3-green w3-button w3-hide-medium w3-hide-large w3-right w3-padding-large w3-hover-white w3-large w3-red" href="javascript:void(0);" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
     <a href="/" class="w3-bar-item w3-green w3-button w3-padding-large w3-white">Home</a>
-    <a href="/overview" class="w3-bar-item w3-green w3-button w3-hide-small w3-padding-large w3-hover-white">Zeit zum Lernen!</a>
-    <a href="/statistics" class="w3-bar-item w3-green w3-button w3-hide-small w3-padding-large w3-hover-white">Persönliche Statistik</a>
-    <a href="#" class="w3-bar-item w3-green w3-button w3-hide-small w3-padding-large w3-hover-white">FAQ</a>
     <a href="/accounts/logout" class="w3-bar-item w3-red w3-button w3-hide-small w3-padding-large w3-hover-white w3-right">Logout</a>
 </div>
 
@@ -45,12 +42,9 @@
   <!-- Navbar on small screens -->
   <div id="navDemo" class="w3-bar-block w3-white w3-hide w3-hide-large w3-hide-medium w3-large">
     <a href="/" class="w3-bar-item w3-green w3-button w3-padding-large">Home</a>
-    <a href="/overview" class="w3-bar-item w3-green w3-button w3-padding-large">Zeit zum Lernen!</a>
-    <a href="/statistics" class="w3-bar-item w3-green w3-button w3-padding-large">Persönliche Statistik</a>
-    <a href="#" class="w3-bar-item w3-green w3-button w3-padding-large">FAQ</a>
     <a href="/accounts/logout" class="w3-bar-item w3-red w3-button w3-padding-large w3-right">Logout</a>
   </div>
-</div>
+</div> {% endcomment %}
 
 {% block content %}
 

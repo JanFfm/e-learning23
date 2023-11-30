@@ -24,7 +24,7 @@ def get_time_char(user_stat_over_time: ProgressPerHour):
     datetimes = [datetime.combine(timestamp.date, datetime.min.time()) + timedelta(hours=timestamp.hour) for timestamp in times]
 
     plt.plot(datetimes, correct, label='Richtige Antworten')
-    plt.plot(datetimes, total, label='Beantwortete Fragen Insgesamt')
+    plt.plot(datetimes, total, label='Beantwortete Fragen')
     plt.gca().xaxis.set_major_formatter(DateFormatter('%d.%m %H:00'))
     plt.xticks(datetimes)
 
@@ -54,7 +54,6 @@ def get_best_of_this_hour(this_user):
     this_users_ratio = 0
     for p in nearest_progresses:
         try:
-           
             if p.user.username == this_user.username:
                 ratios_per_user.append((p.correct_count/p.count, p.user.username, "r"))
                 this_users_ratio = p.correct_count/p.count
@@ -78,6 +77,7 @@ def get_best_of_this_hour(this_user):
                 ratios= (this_users_ratio,) + ratios 
                 users = (this_user.username,) + users
             plt.bar(users, ratios, color=color)
+            #plt.bar_label("Anteil richtige")
             #plt.xticks(users)
 
             image_stream = BytesIO()
