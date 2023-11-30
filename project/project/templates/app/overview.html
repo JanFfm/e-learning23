@@ -27,6 +27,15 @@
             <div class="text-center">
                 <h2>Mit welcher Lektion wollen wir weitermachen?</h2>
             </div>
+            {% if lives.get_lives < 5 %}
+            <div class="text-center">
+                <h3>Du hast aktuell {{lives.get_lives}} Leben. Nächstes Leben in {{lives.time_left}} Minuten.</h3>
+            </div>
+            {% else %}
+            <div class="text-center">
+                <h3>Du hast aktuell {{lives.get_lives}} Leben.</h3>
+            </div>
+            {% endif %}
           <hr>
         </div>
         <div class="steps">

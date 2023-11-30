@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django_htmx.http import HttpResponseClientRedirect
 import random
 from datetime import datetime
-from .models import  Progress, Word, Sentence, ProgressSentence, Streaks, TimeStamp, ProgressPerHour, LectionProgress
+from .models import  Progress, Word, Sentence, ProgressSentence, Streaks, TimeStamp, ProgressPerHour, LectionProgress, UserSettings
 from gtts import gTTS
 from io import BytesIO
 import speech_recognition as sr
@@ -38,6 +38,9 @@ def homepage(request):
             num = lection['lection']
             lp, created = LectionProgress.objects.get_or_create(lection_number=num, user=request.user)
          
+        #setup user settings e.g. lives
+        user_set = UserSettings.objects.get_or_create(user=request.user)
+
         
         time_stamp,_ = TimeStamp.objects.get_or_create(date=datetime.now().today().date(), hour=datetime.now().hour) 
         users_streaks, created = Streaks.objects.get_or_create(user=request.user)        
@@ -68,9 +71,16 @@ def homepage(request):
 def lesson_overview(request):
     if request.method == "GET":
         
-        lection_progress = LectionProgress.objects.all().filter(user=request.user).order_by('id')
+        user_lives = UserSettings.objects.filter(user=request.user).first()
+        if user_lives.is_timer_up():
+            user_lives.increase_lives()
+            if user_lives.get_lives() < 5:
+                user_lives.set_timer()
+
+        lection_progress = LectionProgress.objects.all().filter(user=request.user).order_by('id')    
         for lp in lection_progress:
             lp.calc_progress(user=request.user)
+            lp.reset_tmp_prg()
         
         for i in range(len(lection_progress)):
             if lection_progress[i].lection_number  == 1:
@@ -81,16 +91,27 @@ def lesson_overview(request):
                     lection_progress[i+1].unlock()
             
     
-       # print(lection_progress.get(user=request.user, lection_number=1).get_progress())
         context = {
             "lection_progress": lection_progress,
+            "lives"           : user_lives,
                    }
         return render(request, "app/overview.html", context)
 
 
 @login_required
 def learn(request, lection_id):
+    
+    user_lives = UserSettings.objects.filter(user=request.user).first()
+    if user_lives.is_timer_up():
+        user_lives.increase_lives()
+        if user_lives.get_lives() < 5:
+            user_lives.set_timer()
 
+    if user_lives.get_lives() <= 0 and (int(lection_id) != 1 and int(lection_id) != 2):
+        messages.error(request, "Du hast kein Leben mehr übrig. Wähle eine der ersten Übungen aus, um wieder Leben zu erhalten oder warte 10 Minuten!")
+
+        return redirect(lesson_overview)
+    
     #TODO maybe a total of 15 question and the return to main menu?
     curr_lection_prg = LectionProgress.objects.filter(user=request.user, lection_number=lection_id).first()
     if(not curr_lection_prg.unlocked):
@@ -100,6 +121,11 @@ def learn(request, lection_id):
     if(curr_lection_prg.get_tmp_prg() == 10): #number of questions can be adjusted here. 10 -> leads to 5 questions
         curr_lection_prg.reset_tmp_prg()
         messages.success(request, "Übung {0} erfolgreich beendet!".format(lection_id))
+
+        if (int(lection_id) == 1 or int(lection_id) == 2) and user_lives.get_lives() < 5:
+            user_lives.increase_lives()
+            messages.success(request, "Glückwunsch, du hast ein Leben zurückgewonnen!")
+
         return redirect(lesson_overview)
     else:
         curr_lection_prg.increase_tmp_prg()
@@ -203,7 +229,8 @@ def push__or_eval_word(request, action=None, index=None):
                     lection_id = sentence.lection
                     print("Value for lection id:", lection_id)
                     progress_obj, _ = ProgressSentence.objects.get_or_create(user=request.user, sentence=sentence)
-                    
+                    user_lives = UserSettings.objects.filter(user=request.user).first()
+                    print("User lives:", user_lives.get_lives())
                     if solution:
                         progress_obj.increase()
                         set_answer_statistics(request.user)               
@@ -213,7 +240,8 @@ def push__or_eval_word(request, action=None, index=None):
                     else:
                         progress_obj.decrease()
                         set_answer_statistics(request.user, False)               
-
+                        user_lives.decrease_lives()
+                        user_lives.set_timer()
                         messages.error(request, "Das war leider falsch!")
                     return HttpResponseClientRedirect(str(lection_id)) # changed this from "learn" to str(lection_id) to get back to sub-url containing lesson index
                     #return redirect("learn", lection_id)
@@ -239,7 +267,8 @@ def multiple_choice(request, lection_id):
 def eval_multiple_choice(request, word: Word, lection_id):
     print(request.POST)
     progress_obj, _ = Progress.objects.get_or_create(user=request.user, word=word)
-
+    user_lives = UserSettings.objects.filter(user=request.user).first()
+    print("User lives:", user_lives.get_lives())
     answer = request.POST['answer']
     print(answer)
     if answer.lower()  == word.translation.lower():
@@ -250,7 +279,8 @@ def eval_multiple_choice(request, word: Word, lection_id):
     else:
         messages.error(request, "Das war leider falsch!")
         set_answer_statistics(request.user, False)               
-
+        user_lives.decrease_lives()
+        user_lives.set_timer()
         progress_obj.decrease()
     return redirect("learn", lection_id)
 
@@ -301,7 +331,8 @@ def listening_comprehension(request, lection_id):
 def eval_listening_comprehension(request, word: Word, lection_id):
     print(request.POST)
     progress_obj, _ = Progress.objects.get_or_create(user=request.user, word=word)
-
+    user_lives = UserSettings.objects.filter(user=request.user).first()
+    print("User lives:", user_lives.get_lives())
     answer = request.POST['answer']
     if answer.lower()  == word.translation.lower():
         set_answer_statistics(request.user)               
@@ -311,7 +342,8 @@ def eval_listening_comprehension(request, word: Word, lection_id):
     else:
         messages.error(request, "Das war leider falsch!")
         set_answer_statistics(request.user, False)               
-
+        user_lives.decrease_lives()
+        user_lives.set_timer()
         progress_obj.decrease()
     return redirect("learn", lection_id)
 
@@ -330,7 +362,8 @@ def speaking_exercice(request, lection_id):
 def eval_speaking_exercice(request, word: Word, lection_id):
     print(request.POST)
     progress_obj, _ = Progress.objects.get_or_create(user=request.user, word=word)
-
+    user_lives = UserSettings.objects.filter(user=request.user).first()
+    print("User lives:", user_lives.get_lives())
     answer = request.POST['ans']
     print("This was the answer", answer)
     if answer.lower()  == word.word.lower():
@@ -341,6 +374,7 @@ def eval_speaking_exercice(request, word: Word, lection_id):
     else:
         messages.error(request, "Das war leider falsch!")
         set_answer_statistics(request.user)               
-
+        user_lives.decrease_lives()
+        user_lives.set_timer()
         progress_obj.decrease()
     return redirect("learn", lection_id)

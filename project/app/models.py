@@ -7,6 +7,7 @@ import string
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import JSONField
 from datetime import datetime, timedelta
+from django.utils import timezone
 
 
 
@@ -243,6 +244,8 @@ class Progress(models.Model):
     progress = models.IntegerField(default=0)
     last_time_learned = models.DateTimeField(auto_now=True)
     
+
+
     class Meta:
             unique_together = (('word', 'user'),)
     def __str__(self):
@@ -264,4 +267,56 @@ class ProgressSentence(Progress):
     sentence = models.ForeignKey(Sentence, on_delete=models.CASCADE, null=True)
     word = None
 
+
+class UserSettings(models.Model):
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, unique=True)
+    lives = models.PositiveSmallIntegerField(default=5)
+    timer = models.DateTimeField(null=True)
+
+    def set_timer(self):
+        if self.timer is None:
+            self.timer = timezone.now()
+            self.save()
+        else:
+            print("Timer has already a set time")
     
+    def is_timer_up(self) -> bool:
+        if self.timer == None:
+            return False
+        now = timezone.now()
+        ten_min = timedelta(minutes=10)
+        print("This worked")
+        if  now - ten_min > self.timer:
+            print("Deleted current timer")
+            self.timer = None
+            self.save()
+            return True
+        else:
+            return False
+
+    def time_left(self):
+        if self.timer != None and  not (timezone.now() - timedelta(minutes=10) > self.timer):
+            rem = self.timer + timedelta(minutes=10) - timezone.now()
+            return rem.seconds // 60 % 60
+        else:
+            return "0"
+
+    def increase_lives(self):
+        if self.lives < 5:
+            self.lives += 1
+            self.save()
+        
+    def decrease_lives(self):
+        if self.lives > 0:
+            self.lives -= 1
+            self.save()
+
+    def get_lives(self):
+        return self.lives
+
+    class Meta:
+        ordering = ('user',)
+
+    def __str__(self):
+        return "User: " + str(self.user) + ", Anzahl Leben: " + str(self.lives)
