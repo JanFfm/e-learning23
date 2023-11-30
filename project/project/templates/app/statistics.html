@@ -1,16 +1,19 @@
 {% extends 'base.html' %}
 {% block content %}
-Deine Aktuelle Statistik:<br>
+<h1>Deine Statistik</h1>
+
+<h2>Dein Lernverlauf</h2>
 <img src="data:image/png;base64,{{user_stat_over_time}}"><br>
 
 
 {% if best_of%}
-%-Richtige pro user in dieser Stunde:
+<h2>Die besten User aktuell</h2>
 
 <img src="data:image/png;base64,{{best_of}}"><br>
 {% endif %}
 
 {% if streak_ranking %}
+<h2>Wer lernt am längsten am Stück?</h2>
 <img src="data:image/png;base64,{{streak_ranking}}"><br>
 {% endif %}
 

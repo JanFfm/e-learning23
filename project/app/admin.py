@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import  Progress, Word, Sentence,LectionProgress, Streaks, ProgressPerHour, TimeStamp,ProgressSentence
+from .models import  Progress, Word, Sentence, LectionProgress, Streaks, ProgressPerHour, TimeStamp, ProgressSentence, UserSettings
 # Register your models here.
 
 
@@ -11,3 +11,4 @@ admin.site.register(LectionProgress)
 admin.site.register(Streaks)
 admin.site.register(ProgressPerHour)
 admin.site.register(TimeStamp)
+admin.site.register(UserSettings)
