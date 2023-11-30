@@ -26,7 +26,27 @@ class Word(models.Model):
         ("9","determiner"))
     part_of_speech = models.CharField(choices=WORD_CHOICES, max_length=1)
     lection = models.PositiveIntegerField(default=1)
-    
+    def weight(self, user):
+        progress = Progress.objects.get_or_create(word=self, user=user)
+        time_stamp, _ = TimeStamp.objects.get_or_create(date=datetime.now().today().date(), hour=datetime.now().hour) 
+        progres_time_stamp = TimeStamp.objects.get_or_create(date=progress.last_time_learned.date(), hour=progress.last_time_learned.hour())
+        time_difference = time_stamp.calculate_time_difference(progres_time_stamp)
+        if time_difference <= 1:
+            weight = 2
+        elif 1 < time_difference <= 4:
+            weight = 4
+        elif 4 < time_difference <= 8:
+            weight = 6
+        elif 8 < time_difference <= 16:
+            weight = 8
+        else:
+            weight = 9
+        p = progress.progress / 11
+        weight = weight * p
+        return weight        
+        
+        
+        
     def __str__(self):
         return self.word +": "+self.translation + " (Lektion: " + str(self.lection) +")"
     class Meta:
@@ -48,10 +68,30 @@ class Sentence(models.Model):
         if words == selection:
             return True
         return False
+    def weight(self, user):
+        progress = ProgressSentence.objects.get_or_create(word=self, user=user)
+        time_stamp, _ = TimeStamp.objects.get_or_create(date=datetime.now().today().date(), hour=datetime.now().hour) 
+        progres_time_stamp = TimeStamp.objects.get_or_create(date=progress.last_time_learned.date(), hour=progress.last_time_learned.hour())
+        time_difference = time_stamp.calculate_time_difference(progres_time_stamp)
+        if time_difference <= 1:
+            weight = 2
+        elif 1 < time_difference <= 4:
+            weight = 4
+        elif 4 < time_difference <= 8:
+            weight = 6
+        elif 8 < time_difference <= 16:
+            weight = 8
+        else:
+            weight = 9
+        p = progress.progress / 11
+        weight = weight * p
+        return weight        
+        
            
     
     def __str__(self):
          return self.sentence_en
+     
 
 
 
@@ -136,8 +176,7 @@ class ProgressPerHour(models.Model):
     time_stamp = models.ForeignKey(TimeStamp, on_delete=models.CASCADE, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     count = models.IntegerField(default=0)
-    correct_count = models.IntegerField(default=0)
-    
+    correct_count = models.IntegerField(default=0)   
 
     class Meta:
         unique_together = ('user', 'time_stamp')
@@ -202,6 +241,7 @@ class Progress(models.Model):
     word = models.ForeignKey(Word, on_delete=models.CASCADE, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     progress = models.IntegerField(default=0)
+    last_time_learned = models.DateTimeField(auto_now=True)
     
     class Meta:
             unique_together = (('word', 'user'),)
