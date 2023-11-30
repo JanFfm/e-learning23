@@ -28,22 +28,21 @@ class Word(models.Model):
     part_of_speech = models.CharField(choices=WORD_CHOICES, max_length=1)
     lection = models.PositiveIntegerField(default=1)
     def weight(self, user):
-        progress = Progress.objects.get_or_create(word=self, user=user)
+        progress, _ = Progress.objects.get_or_create(word=self, user=user)
         time_stamp, _ = TimeStamp.objects.get_or_create(date=datetime.now().today().date(), hour=datetime.now().hour) 
-        progres_time_stamp = TimeStamp.objects.get_or_create(date=progress.last_time_learned.date(), hour=progress.last_time_learned.hour())
+        progres_time_stamp, _ = TimeStamp.objects.get_or_create(date=progress.last_time_learned.date(), hour=progress.last_time_learned.hour)
         time_difference = time_stamp.calculate_time_difference(progres_time_stamp)
         if time_difference <= 1:
-            weight = 2
+            weight = 10
         elif 1 < time_difference <= 4:
-            weight = 4
+            weight = 8
         elif 4 < time_difference <= 8:
             weight = 6
         elif 8 < time_difference <= 16:
-            weight = 8
+            weight = 4
         else:
-            weight = 9
-        p = progress.progress / 11
-        weight = weight * p
+            weight = 2
+        weight = 20 /( progress.progress + weight)
         return weight        
         
         
@@ -70,9 +69,9 @@ class Sentence(models.Model):
             return True
         return False
     def weight(self, user):
-        progress = ProgressSentence.objects.get_or_create(word=self, user=user)
+        progress, _ = ProgressSentence.objects.get_or_create(sentence=self, user=user)
         time_stamp, _ = TimeStamp.objects.get_or_create(date=datetime.now().today().date(), hour=datetime.now().hour) 
-        progres_time_stamp = TimeStamp.objects.get_or_create(date=progress.last_time_learned.date(), hour=progress.last_time_learned.hour())
+        progres_time_stamp, _ = TimeStamp.objects.get_or_create(date=progress.last_time_learned.date(), hour=progress.last_time_learned.hour)
         time_difference = time_stamp.calculate_time_difference(progres_time_stamp)
         if time_difference <= 1:
             weight = 2

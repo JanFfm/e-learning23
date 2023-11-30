@@ -65,7 +65,7 @@ def homepage(request):
             "date": datetime.now(),
         }
         return render(request,"app/dashboard.html", context)
-    
+   
 
 @login_required
 def lesson_overview(request):
@@ -89,8 +89,6 @@ def lesson_overview(request):
             if lection_progress[i].get_progress() > 0.3:
                 if i+1 <= len(lection_progress):
                     lection_progress[i+1].unlock()
-            
-    
         context = {
             "lection_progress": lection_progress,
             "lives"           : user_lives,
@@ -165,9 +163,9 @@ def learn(request, lection_id):
         
 def build_sentence(request, lection_id): 
             if request.method == "GET":    
-                sentence_list = list(Sentence.objects.filter(lection=lection_id))
-                weigts_list = (s.weight(request.user) for s in sentence_list)
-                sentence = random.choice(sentence_list,weighzs=weigts_list, k=4) #
+                sentence_list = Sentence.objects.filter(lection=lection_id)
+                weigts_list = [s.weight(request.user) for s in sentence_list]
+                sentence = random.choices(sentence_list,weights=weigts_list, k=1)[0] #
                 print(sentence.lection)
                 template = "app/build_sentence.html"
                 words = sentence.get_words_en()
@@ -251,8 +249,8 @@ def push__or_eval_word(request, action=None, index=None):
 def multiple_choice(request, lection_id):
     """ Prepare a multiple choice question"""
     word_list = list(Word.objects.filter(lection=lection_id))
-    weigts_list = (w.weight(request.user) for w in word_list)
-    words = random.choice(word_list,weighzs=weigts_list, k=4) # pick 4 cards
+    weigts_list = [w.weight(request.user) for w in word_list]
+    words = random.choices(word_list,weights=weigts_list, k=4) # pick 4 cards
     
     cache.set('mode', 'multiple_choice', 300)
     cache.set("word", words[0].id)
@@ -290,8 +288,8 @@ def eval_multiple_choice(request, word: Word, lection_id):
 def word_translation(request, lection_id):
     #word = Word.objects.filter(lection=lection_id).order_by('?').first()
     word_list = list(Word.objects.filter(lection=lection_id))
-    weigts_list = (w.weight(request.user) for w in word_list)
-    word = random.choice(word_list,weighzs=weigts_list, k=1) #
+    weigts_list = [w.weight(request.user) for w in word_list]
+    word = random.choices(word_list,weights=weigts_list, k=1)[0] #
     cache.set('mode', 'word_translation', 30)
     cache.set("word", word.pk)
     
@@ -310,8 +308,8 @@ def listening_comprehension(request, lection_id):
 
     #word = Word.objects.filter(lection=lection_id).order_by('?').first()
     word_list = list(Word.objects.filter(lection=lection_id))
-    weigts_list = (w.weight(request.user) for w in word_list)    
-    word = random.choice(word_list,weighzs=weigts_list, k=1) #
+    weigts_list = [w.weight(request.user) for w in word_list]    
+    word = random.choices(word_list,weights=weigts_list, k=1)[0] #
     
     cache.set('mode', 'listening_comprehension', 30)
     cache.set("word", word.pk)
