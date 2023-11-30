@@ -318,4 +318,4 @@ class UserSettings(models.Model):
         ordering = ('user',)
 
     def __str__(self):
-        return "User: " + str(self.user) + ", Anzahl Leben: " + str(self.lives)
+        return  str(self.lives) + " x "
