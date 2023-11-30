@@ -54,7 +54,6 @@ def get_best_of_this_hour(this_user):
     this_users_ratio = 0
     for p in nearest_progresses:
         try:
-           
             if p.user.username == this_user.username:
                 ratios_per_user.append((p.correct_count/p.count, p.user.username, "r"))
                 this_users_ratio = p.correct_count/p.count
