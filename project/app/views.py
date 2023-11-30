@@ -165,6 +165,8 @@ def build_sentence(request, lection_id):
             if request.method == "GET":    
                 sentence_list = Sentence.objects.filter(lection=lection_id)
                 weigts_list = [s.weight(request.user) for s in sentence_list]
+                if sum(weigts_list) <= 0:
+                     weigts_list = None
                 sentence = random.choices(sentence_list,weights=weigts_list, k=1)[0] #
                 print(sentence.lection)
                 template = "app/build_sentence.html"
@@ -250,6 +252,8 @@ def multiple_choice(request, lection_id):
     """ Prepare a multiple choice question"""
     word_list = list(Word.objects.filter(lection=lection_id))
     weigts_list = [w.weight(request.user) for w in word_list]
+    if sum(weigts_list) <= 0:
+        weigts_list = None
     words = random.choices(word_list,weights=weigts_list, k=4) # pick 4 cards
     
     cache.set('mode', 'multiple_choice', 300)
@@ -289,6 +293,8 @@ def word_translation(request, lection_id):
     #word = Word.objects.filter(lection=lection_id).order_by('?').first()
     word_list = list(Word.objects.filter(lection=lection_id))
     weigts_list = [w.weight(request.user) for w in word_list]
+    if sum(weigts_list) <= 0:
+            weigts_list = None
     word = random.choices(word_list,weights=weigts_list, k=1)[0] #
     cache.set('mode', 'word_translation', 30)
     cache.set("word", word.pk)
@@ -309,6 +315,8 @@ def listening_comprehension(request, lection_id):
     #word = Word.objects.filter(lection=lection_id).order_by('?').first()
     word_list = list(Word.objects.filter(lection=lection_id))
     weigts_list = [w.weight(request.user) for w in word_list]    
+    if sum(weigts_list) <= 0:
+            weigts_list = None
     word = random.choices(word_list,weights=weigts_list, k=1)[0] #
     
     cache.set('mode', 'listening_comprehension', 30)
