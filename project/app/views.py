@@ -120,7 +120,7 @@ def learn(request, lection_id):
         messages.error(request, "Diese Übung ist noch nicht freigeschaltet!")
         return redirect(lesson_overview)
     
-    if(curr_lection_prg.get_tmp_prg() == 10): #number of questions can be adjusted here. 10 -> leads to 5 questions
+    if(curr_lection_prg.get_tmp_prg() == 20): #number of questions can be adjusted here. 10 -> leads to 5 questions
         curr_lection_prg.reset_tmp_prg()
         messages.success(request, "Übung {0} erfolgreich beendet!".format(lection_id))
 
@@ -292,9 +292,9 @@ def eval_multiple_choice(request, word: Word, lection_id):
     progress_obj, _ = Progress.objects.get_or_create(user=request.user, word=word)
     user_lives = UserSettings.objects.filter(user=request.user).first()
     print("User lives:", user_lives.get_lives())
-    answer = request.POST['answer']
-    print(answer)
-    if answer.lower()  == word.translation.lower():
+    answer = request.POST.get('answer', None)
+    print("Antwort", answer)    
+    if  answer is not None and answer.lower()  == word.translation.lower():   
         messages.success(request, "Das war richtig.")
         set_answer_statistics(request.user)               
 
