@@ -6,35 +6,61 @@
 {% endblock head_title %}
 {% block content %}
 
-<br>
-<br>
-<br>
-    {% element h1 %}
-        {% trans "Sign In" %}
-    {% endelement %}
-    <p>
-        {% blocktrans %}
-    <a href="{{ signup_url }}">sign up</a> first.{% endblocktrans %}
-    </p>
-    {% url 'account_login' as login_url %}
-    {% element form form=form method="post" action=login_url tags="entrance,login" %}
-        {% slot body %}
-            {% csrf_token %}
-            {% element fields form=form unlabeled=True %}
-            {% endelement %}
-            {% if redirect_field_value %}
-                <input type="hidden"
-                       name="{{ redirect_field_name }}"
-                       value="{{ redirect_field_value }}" />
+<body>
+    <div class="bg-gradient_solid">
+        <header style="padding:128px 16px">
+            <div class="w3-content">
+                <div class="w3-twothird">
+                    <div class="text-center">
+                        <div>
+                            <h4 class="w3-margin w3-jumbo">
+                                J.A.T. - Join, Achieve, Triumph!
+                                {% element h1 %}
+                                    {% trans "Melde dich jetzt hier an" %}
+                                {% endelement %}
+                                <p>
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="w3-third w3-right">
+                    <img src="/media/cute_panda.jpg" alt="J.A.T." class = "img-header"/> 
+                    {% comment %} https://hotpot.ai/art-generator {% endcomment %}
+                </div>
+              {% comment %} </div> {% endcomment %}
+            </div>
+        </header>
+        <div class="container">
+            <div class="section-header"> 
+                <div class="text-left">
+                  {% blocktrans %}
+                    <a href="{{ signup_url }}">Registriere dich</a> zuerst.{% endblocktrans %}
+                    </p>
+                    {% url 'account_login' as login_url %}
+                    {% element form form=form method="post" action=login_url tags="entrance,login" %}
+                        {% slot body %}
+                            {% csrf_token %}
+                            {% element fields form=form unlabeled=True %}
+                            {% endelement %}
+                            {% if redirect_field_value %}
+                                <input type="hidden"
+                                    name="{{ redirect_field_name }}"
+                                    value="{{ redirect_field_value }}" />
 
-                       
-            {% endif %}
-        {% endslot %}
-        {% slot actions %}
-            {% element button type="submit" tags="prominent,login" %}
-                {% trans "Sign In" %}
-            {% endelement %}
-        {% endslot %}
-    {% endelement %}
-    {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
+                                    
+                            {% endif %}
+                        {% endslot %}
+                        {% slot actions %}
+                            {% element button type="submit" tags="prominent,login" %}
+                                {% trans "Sign In" %}
+                            {% endelement %}
+                        {% endslot %}
+                    {% endelement %}
+                    {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
+                </div>
+            </div>
+          </div>
+        </div>
+    
+    </body>
 {% endblock content %}
