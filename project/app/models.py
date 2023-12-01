@@ -12,7 +12,7 @@ from django.utils import timezone
 
 
 class Word(models.Model):
-    
+    # Ein wort zum lernen    
     word = models.CharField(max_length=300)
     translation = models.CharField(max_length=300)
     WORD_CHOICES = (
@@ -28,6 +28,7 @@ class Word(models.Model):
     part_of_speech = models.CharField(choices=WORD_CHOICES, max_length=1)
     lection = models.PositiveIntegerField(default=1)
     def weight(self, user):
+        # Gewichte das Wort für die Zufallsauswahl entsprechend Fortschritt & Abstand der letzen Wiederholung:
         progress, _ = Progress.objects.get_or_create(word=self, user=user)
         time_stamp, _ = TimeStamp.objects.get_or_create(date=datetime.now().today().date(), hour=datetime.now().hour) 
         progres_time_stamp, _ = TimeStamp.objects.get_or_create(date=progress.last_time_learned.date(), hour=progress.last_time_learned.hour)
@@ -44,8 +45,7 @@ class Word(models.Model):
             weight = 2
         weight = 20 /( progress.progress + weight)
         return weight        
-        
-        
+                
         
     def __str__(self):
         return self.word +": "+self.translation + " (Lektion: " + str(self.lection) +")"
@@ -93,16 +93,8 @@ class Sentence(models.Model):
          return self.sentence_en
      
 
-
-
-
-
-#ToDO: Rangliste für User per h
-# Gewichtete Fragen-Auswahl nach besten/schlechtesten
-# Steak
-# Statistik für Aufgabentypen
-# statistiken nach versch. Zeitfenstern filtern
 class TimeStamp(models.Model):
+    # Ein Zeitabschnitt in dem gelernt wurde
     date =models.DateField()
     hour = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(23)])
     related_users = models.ManyToManyField(settings.AUTH_USER_MODEL)
@@ -119,8 +111,8 @@ class TimeStamp(models.Model):
     def __str__(self):
         return f"{self.date}: {self.hour}:00"
 
-
 class Streaks(models.Model):
+    # Die Lern-Streaks eines USers
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, unique=True)
     learning_times = models.ManyToManyField(TimeStamp)    
     
@@ -131,10 +123,10 @@ class Streaks(models.Model):
         if time not in self.learning_times:
             self.learning_times.add(time)
             self.save()
-            self.check_streak()
-            
+            self.check_streak()          
             
     def count_streaks(self):
+        # Wie lang ist die längste und die aktuelle Streak des Users
         print(self.learning_times.all())
 
         sorted_learning_times = sorted(self.learning_times.all(), key=lambda x: (x.date, x.hour))
@@ -153,9 +145,7 @@ class Streaks(models.Model):
      
         return longest_streak, act_streak
     
-    def check_if_in_streak(self, time_stamp): 
-        print(__name__)  
-      
+    def check_if_in_streak(self, time_stamp):      
         if (len(self.learning_times.all())) == 0:
             print("len")
             return False
@@ -168,16 +158,13 @@ class Streaks(models.Model):
         else:
             return True
 
-        
-    
-
 
 class ProgressPerHour(models.Model):
+    # Zähle die totale udn die richtige Anzahl Übungen eines Users pro Timestamp 
     time_stamp = models.ForeignKey(TimeStamp, on_delete=models.CASCADE, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     count = models.IntegerField(default=0)
     correct_count = models.IntegerField(default=0)   
-
     class Meta:
         unique_together = ('user', 'time_stamp')
         ordering = ('time_stamp',)
@@ -186,14 +173,15 @@ class ProgressPerHour(models.Model):
     
 
 class LectionProgress(models.Model):
+    # Der Fortschritt eines Users pro Lektion
     lection_number = models.IntegerField()
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
-
     progress = models.FloatField( validators=[MinValueValidator(0.0), MaxValueValidator(1.0)], default=0)
 
     unlocked = models.BooleanField(default=False)
     tmp_lection_prg = models.PositiveIntegerField(default=0)
     def calc_progress(self, user):
+        # Berechne den Fortschritt
         words_in_lection = Word.objects.filter(lection=self.lection_number)
         sentences_in_lection =Sentence.objects.filter(lection=self.lection_number)
         hundret_percent = (len(words_in_lection)+ len(sentences_in_lection)) * 10 + 0.000001
@@ -214,11 +202,11 @@ class LectionProgress(models.Model):
         self.progress = progress_count / hundret_percent
         self.save()
 
-
     def unlock(self):
         self.unlocked = True
         self.save()
 
+    # Berechne den Fortschritt im aktuellen Lerndurchlauf
     def increase_tmp_prg(self):
         self.tmp_lection_prg = self.tmp_lection_prg + 1
         self.save()
@@ -238,13 +226,11 @@ class LectionProgress(models.Model):
 
 
 class Progress(models.Model):
+    # Speiche den Lernfortschritt pro user und wort
     word = models.ForeignKey(Word, on_delete=models.CASCADE, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     progress = models.IntegerField(default=0)
     last_time_learned = models.DateTimeField(auto_now=True)
-    
-
-
     class Meta:
             unique_together = (('word', 'user'),)
     def __str__(self):
@@ -261,14 +247,13 @@ class Progress(models.Model):
                 self.progress += 1
                 self.save()
 
-
 class ProgressSentence(Progress):
     sentence = models.ForeignKey(Sentence, on_delete=models.CASCADE, null=True)
     word = None
 
 
 class UserSettings(models.Model):
-
+    # Daten zu jedem User
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, unique=True)
     lives = models.PositiveSmallIntegerField(default=5)
     timer = models.DateTimeField(null=True)

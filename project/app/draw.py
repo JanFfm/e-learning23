@@ -14,6 +14,7 @@ from .models import ProgressPerHour, TimeStamp, Streaks
 matplotlib.use('Agg') 
 
 def get_time_char(user_stat_over_time: ProgressPerHour):
+    # Erstelle die Statistik für den angemeldeten User
     times = []
     correct = []
     total =[]
@@ -40,6 +41,7 @@ def get_time_char(user_stat_over_time: ProgressPerHour):
 
 
 def get_best_of_this_hour(this_user):
+    # Erstelle die Rangliste aller User in ihrem letzen Lernabschnitt:
     time_stamp,_ = TimeStamp.objects.get_or_create(date=datetime.now().today().date(), hour=datetime.now().hour) 
     users = get_user_model().objects.all()
     nearest_progresses = []
@@ -77,8 +79,7 @@ def get_best_of_this_hour(this_user):
                 ratios= (this_users_ratio,) + ratios 
                 users = (this_user.username,) + users
             plt.bar(users, ratios, color=color)
-            #plt.bar_label("Anteil richtige")
-            #plt.xticks(users)
+    
 
             image_stream = BytesIO()
             plt.savefig(image_stream, format='png')
@@ -91,7 +92,8 @@ def get_best_of_this_hour(this_user):
         return None
     
 
-def get_streak_list(user):            
+def get_streak_list(user):  
+    # erstelle die Rangliste bezgl. der Lern-Streaks    
     all_users = get_user_model().objects.all()
     all_streaks = []
     my_streaks = []
@@ -117,8 +119,6 @@ def get_streak_list(user):
     print(users, score, color)
 
     plt.bar(users, score, color=color)
-    #plt.gca().xaxis.set_major_formatter(StrMethodFormatter())
-    #plt.xticks(users)
 
     image_stream = BytesIO()
     plt.savefig(image_stream, format='png')

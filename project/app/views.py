@@ -18,6 +18,7 @@ from .draw import get_time_char, get_best_of_this_hour, get_streak_list
 
 @login_required
 def statistics(request):
+    # Erstell die Seite Für persönliche Statistiken
     template = "app/statistics.html"
     user_stat_over_time = ProgressPerHour.objects.filter(user=request.user)
     user_stat_over_time = get_time_char(user_stat_over_time)
@@ -71,6 +72,7 @@ def homepage(request):
 
 @login_required
 def lesson_overview(request):
+    # Übersicht der einzelnen Lektionen und Lektionsauswahl
     if request.method == "GET":
         
         user_lives = UserSettings.objects.filter(user=request.user).first()
@@ -100,6 +102,7 @@ def lesson_overview(request):
 
 @login_required
 def learn(request, lection_id):
+    # Zufallsauswahl der Lernmethode und Evaluation der Antwortem
     
     user_lives = UserSettings.objects.filter(user=request.user).first()
     curr_lection_prg = LectionProgress.objects.filter(user=request.user, lection_number=lection_id).first()
@@ -112,9 +115,7 @@ def learn(request, lection_id):
     if user_lives.get_lives() <= 0 and (int(lection_id) != 1 and int(lection_id) != 2):
         messages.error(request, "Du hast kein Leben mehr übrig. Wähle eine der ersten Übungen aus, um wieder Leben zu erhalten oder warte 10 Minuten!")
         curr_lection_prg.reset_tmp_prg()
-        return redirect(lesson_overview)
-    
-    #TODO maybe a total of 15 question and the return to main menu?
+        return redirect(lesson_overview)    
     
     if(not curr_lection_prg.unlocked):
         messages.error(request, "Diese Übung ist noch nicht freigeschaltet!")
@@ -161,13 +162,11 @@ def learn(request, lection_id):
                 return eval_listening_comprehension(request, word, lection_id)
             case "speaking_exercice":
                 return eval_speaking_exercice(request, word, lection_id)
-            # and here for evaluation:
-        print("Failed in elif", learn_mode)
-    else:
-        print("Failed here", learn_mode)
+
 
         
 def build_sentence(request, lection_id): 
+    # Startet das Zusammensetzen der Sätze
             if request.method == "GET":   
                 user_lives = UserSettings.objects.filter(user=request.user).first()
  
@@ -209,6 +208,7 @@ def set_answer_statistics(user, correct=True):
 
 @login_required
 def push__or_eval_word(request, action=None, index=None):
+    # Orhanisiert die zwischenschritte beim Satz zusammen bauen
     print(request.POST)
     if request.htmx: 
         if action and index: 
@@ -216,20 +216,21 @@ def push__or_eval_word(request, action=None, index=None):
             words = request.POST.getlist('words')  if 'words' in request.POST.keys() else []
             selected_words = request.POST.getlist('selected_words') if 'selected_words' in request.POST.keys() else []
 
-
+            # Ein Wort wird dem Satz hinzu gefügt
             if action=="push":
                 selected_words.append(words[index])
                 words.pop(index)
                 
                 context = {"words":words, "selected_words":selected_words, "htmx_url": 'push_word', "target_id": "#word-container"}        
                 return render(request, "app/partials/sentence_building_partial.html", context)
+            # Oder wieder heraus genommen:
             elif action=="pull":
                 words.append(selected_words[index])
                 selected_words.pop(index)
                 context = {"words":words, "selected_words":selected_words, "htmx_url": 'push_word', "target_id": "#word-container"}      
                 return render(request, "app/partials/sentence_building_partial.html", context)
 
-                
+            # Prüfe das Ergebnis           
             elif action == "check":
                 if len(words) > 0:
                     context = {"words":words, "selected_words":selected_words, "htmx_url": 'push_word', "target_id": "#word-container", "message": "Bitte setze den Satz aus allen Wörtern zusammen!"}      
@@ -272,9 +273,7 @@ def multiple_choice(request, lection_id):
     else:
         weights_list = None
 
-    words = np.random.choice(word_list, size=4, replace=False, p=weights_list)
-# pick 4 cards
-    
+    words = np.random.choice(word_list, size=4, replace=False, p=weights_list)    
     cache.set('mode', 'multiple_choice', 300)
     cache.set("word", words[0].id)
     question = words[0].word
@@ -312,8 +311,7 @@ def eval_multiple_choice(request, word: Word, lection_id):
 
 def word_translation(request, lection_id):
     user_lives = UserSettings.objects.filter(user=request.user).first()
-
-    #word = Word.objects.filter(lection=lection_id).order_by('?').first()
+    
     word_list = list(Word.objects.filter(lection=lection_id))
     weights_list = [w.weight(request.user) for w in word_list]
     if sum(weights_list) > 0:
@@ -321,7 +319,7 @@ def word_translation(request, lection_id):
     else:
         weights_list = None
 
-    word = np.random.choice(word_list, size=1, replace=False, p=weights_list)[0] #
+    word = np.random.choice(word_list, size=1, replace=False, p=weights_list)[0] 
     cache.set('mode', 'word_translation', 30)
     cache.set("word", word.pk)
     
@@ -338,8 +336,6 @@ def eval_word_translation(request, word: Word, lection_id):
 
 
 def listening_comprehension(request, lection_id):
-
-    #word = Word.objects.filter(lection=lection_id).order_by('?').first()
     word_list = list(Word.objects.filter(lection=lection_id))
     weights_list = [w.weight(request.user) for w in word_list]    
     if sum(weights_list) > 0:
@@ -347,7 +343,7 @@ def listening_comprehension(request, lection_id):
     else:
         weights_list = None
 
-    word = np.random.choice(word_list, size=1, replace=False, p=weights_list)[0] #
+    word = np.random.choice(word_list, size=1, replace=False, p=weights_list)[0]
  #
     
     cache.set('mode', 'listening_comprehension', 30)
