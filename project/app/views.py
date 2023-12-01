@@ -12,6 +12,8 @@ from io import BytesIO
 import speech_recognition as sr
 import pyttsx3
 import matplotlib.pyplot as plt
+import numpy as np
+
 from .draw import get_time_char, get_best_of_this_hour, get_streak_list
 
 @login_required
@@ -170,10 +172,14 @@ def build_sentence(request, lection_id):
                 user_lives = UserSettings.objects.filter(user=request.user).first()
  
                 sentence_list = Sentence.objects.filter(lection=lection_id)
-                weigts_list = [s.weight(request.user) for s in sentence_list]
-                if sum(weigts_list) <= 0:
-                     weigts_list = None
-                sentence = random.choices(sentence_list,weights=weigts_list, k=1)[0] #
+                weights_list = [s.weight(request.user) for s in sentence_list]
+                if sum(weights_list) > 0:
+                        weights_list = weights_list / np.sum(weights_list)
+                else:
+                    weights_list = None
+
+                sentence = np.random.choice(sentence_list, size=1, replace=False, p=weights_list)[0] #
+
                 print(sentence.lection)
                 template = "app/build_sentence.html"
                 words = sentence.get_words_en()
@@ -260,10 +266,14 @@ def multiple_choice(request, lection_id):
 
     
     word_list = list(Word.objects.filter(lection=lection_id))
-    weigts_list = [w.weight(request.user) for w in word_list]
-    if sum(weigts_list) <= 0:
-        weigts_list = None
-    words = random.choices(word_list,weights=weigts_list, k=4) # pick 4 cards
+    weights_list  = [w.weight(request.user) for w in word_list]
+    if sum(weights_list) > 0:
+            weights_list = weights_list / np.sum(weights_list)
+    else:
+        weights_list = None
+
+    words = np.random.choice(word_list, size=4, replace=False, p=weights_list)
+# pick 4 cards
     
     cache.set('mode', 'multiple_choice', 300)
     cache.set("word", words[0].id)
@@ -305,10 +315,13 @@ def word_translation(request, lection_id):
 
     #word = Word.objects.filter(lection=lection_id).order_by('?').first()
     word_list = list(Word.objects.filter(lection=lection_id))
-    weigts_list = [w.weight(request.user) for w in word_list]
-    if sum(weigts_list) <= 0:
-            weigts_list = None
-    word = random.choices(word_list,weights=weigts_list, k=1)[0] #
+    weights_list = [w.weight(request.user) for w in word_list]
+    if sum(weights_list) > 0:
+            weights_list = weights_list / np.sum(weights_list)
+    else:
+        weights_list = None
+
+    word = np.random.choice(word_list, size=1, replace=False, p=weights_list)[0] #
     cache.set('mode', 'word_translation', 30)
     cache.set("word", word.pk)
     
@@ -328,10 +341,14 @@ def listening_comprehension(request, lection_id):
 
     #word = Word.objects.filter(lection=lection_id).order_by('?').first()
     word_list = list(Word.objects.filter(lection=lection_id))
-    weigts_list = [w.weight(request.user) for w in word_list]    
-    if sum(weigts_list) <= 0:
-            weigts_list = None
-    word = random.choices(word_list,weights=weigts_list, k=1)[0] #
+    weights_list = [w.weight(request.user) for w in word_list]    
+    if sum(weights_list) > 0:
+            weights_list = weights_list / np.sum(weights_list)
+    else:
+        weights_list = None
+
+    word = np.random.choice(word_list, size=1, replace=False, p=weights_list)[0] #
+ #
     
     cache.set('mode', 'listening_comprehension', 30)
     cache.set("word", word.pk)
