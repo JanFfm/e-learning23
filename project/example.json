@@ -9,39 +9,48 @@
 }
 },
 {
-    "model": "app.word",
-    "fields": {
-        "word":"Dog",
-        "translation":"Hund",
-        "part_of_speech":1
-    
-    }
-    },
-    {
-        "model": "app.word",
-        "fields": {
-            "word":"Car",
-            "translation":"Auto",
-            "part_of_speech":1
-        
-        }
-        },
-        {
-            "model": "app.word",
-            "fields": {
-                "word":"Language",
-                "translation":"spreache",
-                "part_of_speech":1
-            
-            }
-            },
-            {
-                "model": "app.word",
-                "fields": {
-                    "word":"Human",
-                    "translation":"Mensch",
-                    "part_of_speech":1
-                
-                }
-                }
+"model": "app.word",
+"fields": {
+	"word":"Dog",
+	"translation":"Hund",
+	"part_of_speech":1
+
+}
+},
+{
+"model": "app.word",
+"fields": {
+	"word":"Mouse",
+	"translation":"Maus",
+	"part_of_speech":1
+
+}
+},
+{
+"model": "app.word",
+"fields": {
+	"word":"Car",
+	"translation":"Auto",
+	"part_of_speech":1
+
+}
+},
+{
+"model": "app.word",
+"fields": {
+	"word":"Language",
+	"translation":"spreache",
+	"part_of_speech":1
+
+}
+},
+{
+"model": "app.word",
+"fields": {
+	"word":"Human",
+	"translation":"Mensch",
+	"part_of_speech":1
+
+}
+}
 ]

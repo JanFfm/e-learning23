@@ -100,6 +100,8 @@ def lesson_overview(request):
 def learn(request, lection_id):
     
     user_lives = UserSettings.objects.filter(user=request.user).first()
+    curr_lection_prg = LectionProgress.objects.filter(user=request.user, lection_number=lection_id).first()
+
     if user_lives.is_timer_up():
         user_lives.increase_lives()
         if user_lives.get_lives() < 5:
@@ -107,11 +109,11 @@ def learn(request, lection_id):
 
     if user_lives.get_lives() <= 0 and (int(lection_id) != 1 and int(lection_id) != 2):
         messages.error(request, "Du hast kein Leben mehr übrig. Wähle eine der ersten Übungen aus, um wieder Leben zu erhalten oder warte 10 Minuten!")
-
+        curr_lection_prg.reset_tmp_prg()
         return redirect(lesson_overview)
     
     #TODO maybe a total of 15 question and the return to main menu?
-    curr_lection_prg = LectionProgress.objects.filter(user=request.user, lection_number=lection_id).first()
+    
     if(not curr_lection_prg.unlocked):
         messages.error(request, "Diese Übung ist noch nicht freigeschaltet!")
         return redirect(lesson_overview)
@@ -158,7 +160,9 @@ def learn(request, lection_id):
             case "speaking_exercice":
                 return eval_speaking_exercice(request, word, lection_id)
             # and here for evaluation:
-     
+        print("Failed in elif", learn_mode)
+    else:
+        print("Failed here", learn_mode)
 
         
 def build_sentence(request, lection_id): 
@@ -244,7 +248,7 @@ def push__or_eval_word(request, action=None, index=None):
                         set_answer_statistics(request.user, False)               
                         user_lives.decrease_lives()
                         user_lives.set_timer()
-                        messages.error(request, "Das war leider falsch!")
+                        messages.error(request, "Das war leider falsch! Die richtige Lösung ist: {0}".format(sentence.sentence_en))
                     return HttpResponseClientRedirect(str(lection_id)) # changed this from "learn" to str(lection_id) to get back to sub-url containing lesson index
                     #return redirect("learn", lection_id)
 
@@ -286,7 +290,7 @@ def eval_multiple_choice(request, word: Word, lection_id):
 
         progress_obj.increase()
     else:
-        messages.error(request, "Das war leider falsch!")
+        messages.error(request, "Das war leider falsch! Die richtige Lösung ist: {0}".format(word.translation))
         set_answer_statistics(request.user, False)               
         user_lives.decrease_lives()
         user_lives.set_timer()
@@ -357,7 +361,7 @@ def eval_listening_comprehension(request, word: Word, lection_id):
         messages.success(request, "Das war richtig.")
         progress_obj.increase()
     else:
-        messages.error(request, "Das war leider falsch!")
+        messages.error(request, "Das war leider falsch! Die richtige Lösung ist: {0}".format(word.translation))
         set_answer_statistics(request.user, False)               
         user_lives.decrease_lives()
         user_lives.set_timer()
@@ -391,7 +395,7 @@ def eval_speaking_exercice(request, word: Word, lection_id):
         messages.success(request, "Das war richtig.")
         progress_obj.increase()
     else:
-        messages.error(request, "Das war leider falsch!")
+        messages.error(request, "Das war leider falsch! Die richtige Lösung ist: {0}".format(word.word))
         set_answer_statistics(request.user)               
         user_lives.decrease_lives()
         user_lives.set_timer()

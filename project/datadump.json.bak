@@ -1,0 +1,430 @@
+[
+{
+"model": "app.sentence",
+"fields": {
+    "sentence_en":"A finger and a hand",
+    "sentence_de":"Ein Finger und eine Hand",
+	"lection":1
+}
+},
+{
+"model": "app.sentence",
+"fields": {
+    "sentence_en":"A leg and a foot",
+    "sentence_de":"Ein Bein und ein Fuß",
+	"lection":1
+}
+},
+{
+"model": "app.sentence",
+"fields": {
+    "sentence_en":"Eye Nose and Ear",
+    "sentence_de":"Auge Nase und Ohr",
+	"lection":1
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Finger",
+    "translation":"Finger",
+    "part_of_speech":1,
+	"lection":1
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Hand",
+    "translation":"Hand",
+    "part_of_speech":1,
+	"lection":1
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Head",
+    "translation":"Kopf",
+    "part_of_speech":1,
+	"lection":1
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Leg",
+    "translation":"Bein",
+    "part_of_speech":1,
+	"lection":1
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Foot",
+    "translation":"Fusß",
+    "part_of_speech":1,
+	"lection":1
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Nose",
+    "translation":"Nase",
+    "part_of_speech":1,
+	"lection":1
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Ear",
+    "translation":"Ohr",
+    "part_of_speech":1,
+	"lection":1
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Eye",
+    "translation":"Auge",
+    "part_of_speech":1,
+	"lection":1
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Mouth",
+    "translation":"Mund",
+    "part_of_speech":1,
+	"lection":1
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Hair",
+    "translation":"Haar",
+    "part_of_speech":1,
+	"lection":1
+}
+},
+{
+"model": "app.sentence",
+"fields": {
+    "sentence_en":"My mother",
+    "sentence_de":"Meine Mutter",
+	"lection":2
+}
+},
+{
+"model": "app.sentence",
+"fields": {
+    "sentence_en":"My father",
+    "sentence_de":"Mein Vater",
+	"lection":2
+}
+},
+{
+"model": "app.sentence",
+"fields": {
+    "sentence_en":"My mother and my sister",
+    "sentence_de":"Meine Mutter und meine Schwester",
+	"lection":2
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Mother",
+    "translation":"Mutter",
+    "part_of_speech":1,
+	"lection":2
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Father",
+    "translation":"Vater",
+    "part_of_speech":1,
+	"lection":2
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Sister",
+    "translation":"Schwester",
+    "part_of_speech":1,
+	"lection":2
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Brother",
+    "translation":"Bruder",
+    "part_of_speech":1,
+	"lection":2
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Daughter",
+    "translation":"Tochter",
+    "part_of_speech":1,
+	"lection":2
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Son",
+    "translation":"Sohn",
+    "part_of_speech":1,
+	"lection":2
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Aunt",
+    "translation":"Tante",
+    "part_of_speech":1,
+	"lection":2
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Uncle",
+    "translation":"Onkel",
+    "part_of_speech":1,
+	"lection":2
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Grandmother",
+    "translation":"Großmutter",
+    "part_of_speech":1,
+	"lection":2
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Grandfather",
+    "translation":"Großvater",
+    "part_of_speech":1,
+	"lection":2
+}
+},
+{
+"model": "app.sentence",
+"fields": {
+    "sentence_en":"A lamp and my book",
+    "sentence_de":"Eine Lampe und mein Buch",
+	"lection":3
+}
+},
+{
+"model": "app.sentence",
+"fields": {
+    "sentence_en":"Pillow and blanket",
+    "sentence_de":"Kissen und Decke",
+	"lection":3
+}
+},
+{
+"model": "app.sentence",
+"fields": {
+    "sentence_en":"Blanket and pillow",
+    "sentence_de":"Decke und Kissen",
+	"lection":3
+}
+},
+{
+"model": "app.sentence",
+"fields": {
+    "sentence_en":"The alarm clock",
+    "sentence_de":"Der Wecker",
+	"lection":3
+}
+},
+{
+"model": "app.sentence",
+"fields": {
+    "sentence_en":"The clock and the window",
+    "sentence_de":"Die Uhr und das Fenster",
+	"lection":3
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Lamp",
+    "translation":"Lampe",
+    "part_of_speech":1,
+	"lection":3
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Bed",
+    "translation":"Bett",
+    "part_of_speech":1,
+	"lection":3
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Book",
+    "translation":"Buch",
+    "part_of_speech":1,
+	"lection":3
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Wardrobe",
+    "translation":"Kleiderschrank",
+    "part_of_speech":1,
+	"lection":3
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Pillow",
+    "translation":"Kissen",
+    "part_of_speech":1,
+	"lection":3
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Alarm clock",
+    "translation":"Wecker",
+    "part_of_speech":1,
+	"lection":3
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Blanket",
+    "translation":"Decke",
+    "part_of_speech":1,
+	"lection":3
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Window",
+    "translation":"Fenster",
+    "part_of_speech":1,
+	"lection":3
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Door",
+    "translation":"Tür",
+    "part_of_speech":1,
+	"lection":3
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Clock",
+    "translation":"Uhr",
+    "part_of_speech":1,
+	"lection":3
+}
+},
+{
+"model": "app.sentence",
+"fields": {
+    "sentence_en":"Knife and fork",
+    "sentence_de":"Messer und Gabel",
+	"lection":4
+}
+},
+{
+"model": "app.sentence",
+"fields": {
+    "sentence_en":"The spoon on the plate",
+    "sentence_de":"Der Löffel auf dem Teller",
+	"lection":4
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Plate",
+    "translation":"Teller",
+    "part_of_speech":1,
+	"lection":4
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Spoon",
+    "translation":"Löffel",
+    "part_of_speech":1,
+	"lection":4
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Fork",
+    "translation":"Gabel",
+    "part_of_speech":1,
+	"lection":4
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Knife",
+    "translation":"Messer",
+    "part_of_speech":1,
+	"lection":4
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Table",
+    "translation":"Tisch",
+    "part_of_speech":1,
+	"lection":4
+}
+},
+{
+"model": "app.word",
+"fields": {
+    "word":"Kitchen",
+    "translation":"Küche",
+    "part_of_speech":1,
+	"lection":4
+}
+}
+]
