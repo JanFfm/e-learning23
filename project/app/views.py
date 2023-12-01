@@ -168,12 +168,13 @@ def build_sentence(request, lection_id):
                 user_lives = UserSettings.objects.filter(user=request.user).first()
  
                 sentence_list = Sentence.objects.filter(lection=lection_id)
-                weigts_list = [s.weight(request.user) for s in sentence_list]
-                if sum(weigts_list) <= 0:
-                     weigts_list = None
-                weigts_list = weigts_list/np.sum(weigts_list)
+                weights_list = [s.weight(request.user) for s in sentence_list]
+                if sum(weights_list) > 0:
+                        weights_list = weights_list / np.sum(weights_list)
+                else:
+                    weights_list = None
 
-                sentence = np.random.choice(sentence_list, size=1, replace=False, p=weigts_list)[0] #
+                sentence = np.random.choice(sentence_list, size=1, replace=False, p=weights_list)[0] #
 
                 print(sentence.lection)
                 template = "app/build_sentence.html"
@@ -263,7 +264,7 @@ def multiple_choice(request, lection_id):
     word_list = list(Word.objects.filter(lection=lection_id))
     weights_list  = [w.weight(request.user) for w in word_list]
     if sum(weights_list) > 0:
-        weights_list = weights_list / np.sum(weights_list)
+            weights_list = weights_list / np.sum(weights_list)
     else:
         weights_list = None
 
@@ -310,12 +311,13 @@ def word_translation(request, lection_id):
 
     #word = Word.objects.filter(lection=lection_id).order_by('?').first()
     word_list = list(Word.objects.filter(lection=lection_id))
-    weigts_list = [w.weight(request.user) for w in word_list]
-    if sum(weigts_list) <= 0:
-            weigts_list = None
-    weigts_list = weigts_list/np.sum(weigts_list)
+    weights_list = [w.weight(request.user) for w in word_list]
+    if sum(weights_list) > 0:
+            weights_list = weights_list / np.sum(weights_list)
+    else:
+        weights_list = None
 
-    word = np.random.choice(word_list, size=1, replace=False, p=weigts_list)[0] #
+    word = np.random.choice(word_list, size=1, replace=False, p=weights_list)[0] #
     cache.set('mode', 'word_translation', 30)
     cache.set("word", word.pk)
     
@@ -335,12 +337,13 @@ def listening_comprehension(request, lection_id):
 
     #word = Word.objects.filter(lection=lection_id).order_by('?').first()
     word_list = list(Word.objects.filter(lection=lection_id))
-    weigts_list = [w.weight(request.user) for w in word_list]    
-    if sum(weigts_list) <= 0:
-            weigts_list = None
-    weigts_list = weigts_list/np.sum(weigts_list)
+    weights_list = [w.weight(request.user) for w in word_list]    
+    if sum(weights_list) > 0:
+            weights_list = weights_list / np.sum(weights_list)
+    else:
+        weights_list = None
 
-    word = np.random.choice(word_list, size=1, replace=False, p=weigts_list)[0] #
+    word = np.random.choice(word_list, size=1, replace=False, p=weights_list)[0] #
  #
     
     cache.set('mode', 'listening_comprehension', 30)
